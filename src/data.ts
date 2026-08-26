@@ -6,10 +6,10 @@ export const MUSCLES: Muscle[] = [
     "naam": "M. gluteus maximus",
     "visualisatie": {
       "basis_weergave": "skelet_achter.png",
-      "origo_x": "50%",
-      "origo_y": "30%",
-      "insertie_x": "50%",
-      "insertie_y": "60%"
+      "origo_x": "45.5%",
+      "origo_y": "19.9%",
+      "insertie_x": "11.8%",
+      "insertie_y": "34.8%"
     },
     "nl": {
       "regio": "GLUTEAAL (Bilregio)",
@@ -31,10 +31,10 @@ export const MUSCLES: Muscle[] = [
     "naam": "M. gluteus medius",
     "visualisatie": {
       "basis_weergave": "skelet_achter.png",
-      "origo_x": "50%",
-      "origo_y": "30%",
-      "insertie_x": "50%",
-      "insertie_y": "60%"
+      "origo_x": "26.8%",
+      "origo_y": "15.2%",
+      "insertie_x": "5.7%",
+      "insertie_y": "28.6%"
     },
     "nl": {
       "regio": "GLUTEAAL (Bilregio)",
@@ -56,10 +56,10 @@ export const MUSCLES: Muscle[] = [
     "naam": "M. gluteus minimus",
     "visualisatie": {
       "basis_weergave": "skelet_achter.png",
-      "origo_x": "50%",
-      "origo_y": "30%",
-      "insertie_x": "50%",
-      "insertie_y": "60%"
+      "origo_x": "20.3%",
+      "origo_y": "17.9%",
+      "insertie_x": "2.4%",
+      "insertie_y": "30.2%"
     },
     "nl": {
       "regio": "GLUTEAAL (Bilregio)",
@@ -81,10 +81,10 @@ export const MUSCLES: Muscle[] = [
     "naam": "M. piriformis",
     "visualisatie": {
       "basis_weergave": "skelet_achter.png",
-      "origo_x": "50%",
-      "origo_y": "30%",
-      "insertie_x": "50%",
-      "insertie_y": "60%"
+      "origo_x": "30.5%",
+      "origo_y": "21.2%",
+      "insertie_x": "7.7%",
+      "insertie_y": "26.8%"
     },
     "nl": {
       "regio": "GLUTEAAL (Bilregio)",
@@ -106,10 +106,10 @@ export const MUSCLES: Muscle[] = [
     "naam": "M. obturatorius internus",
     "visualisatie": {
       "basis_weergave": "skelet_achter.png",
-      "origo_x": "50%",
-      "origo_y": "30%",
-      "insertie_x": "50%",
-      "insertie_y": "60%"
+      "origo_x": "36.6%",
+      "origo_y": "29.4%",
+      "insertie_x": "8.1%",
+      "insertie_y": "27.0%"
     },
     "nl": {
       "regio": "GLUTEAAL (Bilregio)",
@@ -131,10 +131,10 @@ export const MUSCLES: Muscle[] = [
     "naam": "Mm. gemelli",
     "visualisatie": {
       "basis_weergave": "skelet_achter.png",
-      "origo_x": "50%",
-      "origo_y": "30%",
-      "insertie_x": "50%",
-      "insertie_y": "60%"
+      "origo_x": "31.7%",
+      "origo_y": "28.1%",
+      "insertie_x": "10.6%",
+      "insertie_y": "27.5%"
     },
     "nl": {
       "regio": "GLUTEAAL (Bilregio)",
@@ -181,10 +181,10 @@ export const MUSCLES: Muscle[] = [
     "naam": "M. sartorius",
     "visualisatie": {
       "basis_weergave": "skelet_voor.png",
-      "origo_x": "50%",
-      "origo_y": "30%",
-      "insertie_x": "50%",
-      "insertie_y": "60%"
+      "origo_x": "10.7%",
+      "origo_y": "18.8%",
+      "insertie_x": "30.3%",
+      "insertie_y": "57.4%"
     },
     "nl": {
       "regio": "BOVENBEEN (Anterieur)",
@@ -206,10 +206,10 @@ export const MUSCLES: Muscle[] = [
     "naam": "M. quadriceps femoris",
     "visualisatie": {
       "basis_weergave": "skelet_voor.png",
-      "origo_x": "50%",
-      "origo_y": "30%",
-      "insertie_x": "50%",
-      "insertie_y": "60%"
+      "origo_x": "10.3%",
+      "origo_y": "35.5%",
+      "insertie_x": "20.5%",
+      "insertie_y": "62.7%"
     },
     "nl": {
       "regio": "BOVENBEEN (Anterieur)",
@@ -231,10 +231,10 @@ export const MUSCLES: Muscle[] = [
     "naam": "M. pectineus",
     "visualisatie": {
       "basis_weergave": "skelet_voor.png",
-      "origo_x": "50%",
-      "origo_y": "30%",
-      "insertie_x": "50%",
-      "insertie_y": "60%"
+      "origo_x": "40.6%",
+      "origo_y": "27.5%",
+      "insertie_x": "18.6%",
+      "insertie_y": "37.4%"
     },
     "nl": {
       "regio": "BOVENBEEN (Mediaal)",
@@ -256,10 +256,10 @@ export const MUSCLES: Muscle[] = [
     "naam": "M. gracilis",
     "visualisatie": {
       "basis_weergave": "skelet_voor.png",
-      "origo_x": "50%",
-      "origo_y": "30%",
-      "insertie_x": "50%",
-      "insertie_y": "60%"
+      "origo_x": "39.0%",
+      "origo_y": "32.1%",
+      "insertie_x": "31.1%",
+      "insertie_y": "58.1%"
     },
     "nl": {
       "regio": "BOVENBEEN (Mediaal)",
@@ -281,10 +281,10 @@ export const MUSCLES: Muscle[] = [
     "naam": "M. adductor longus",
     "visualisatie": {
       "basis_weergave": "skelet_voor.png",
-      "origo_x": "50%",
-      "origo_y": "30%",
-      "insertie_x": "50%",
-      "insertie_y": "60%"
+      "origo_x": "35.8%",
+      "origo_y": "32.3%",
+      "insertie_x": "19.7%",
+      "insertie_y": "44.1%"
     },
     "nl": {
       "regio": "BOVENBEEN (Mediaal)",
@@ -306,10 +306,10 @@ export const MUSCLES: Muscle[] = [
     "naam": "M. adductor brevis",
     "visualisatie": {
       "basis_weergave": "skelet_voor.png",
-      "origo_x": "50%",
-      "origo_y": "30%",
-      "insertie_x": "50%",
-      "insertie_y": "60%"
+      "origo_x": "39.8%",
+      "origo_y": "31.8%",
+      "insertie_x": "18.6%",
+      "insertie_y": "40.6%"
     },
     "nl": {
       "regio": "BOVENBEEN (Mediaal)",
@@ -331,10 +331,10 @@ export const MUSCLES: Muscle[] = [
     "naam": "M. adductor magnus",
     "visualisatie": {
       "basis_weergave": "skelet_voor.png",
-      "origo_x": "50%",
-      "origo_y": "30%",
-      "insertie_x": "50%",
-      "insertie_y": "60%"
+      "origo_x": "37.4%",
+      "origo_y": "32.4%",
+      "insertie_x": "17.8%",
+      "insertie_y": "38.2%"
     },
     "nl": {
       "regio": "BOVENBEEN (Mediaal)",
@@ -356,10 +356,10 @@ export const MUSCLES: Muscle[] = [
     "naam": "M. biceps femoris",
     "visualisatie": {
       "basis_weergave": "skelet_achter.png",
-      "origo_x": "50%",
-      "origo_y": "30%",
-      "insertie_x": "50%",
-      "insertie_y": "60%"
+      "origo_x": "35.4%",
+      "origo_y": "33.2%",
+      "insertie_x": "29.7%",
+      "insertie_y": "64.6%"
     },
     "nl": {
       "regio": "BOVENBEEN (Posterieur)",
@@ -381,10 +381,10 @@ export const MUSCLES: Muscle[] = [
     "naam": "M. semitendinosus",
     "visualisatie": {
       "basis_weergave": "skelet_achter.png",
-      "origo_x": "50%",
-      "origo_y": "30%",
-      "insertie_x": "50%",
-      "insertie_y": "60%"
+      "origo_x": "35.0%",
+      "origo_y": "32.9%",
+      "insertie_x": "28.5%",
+      "insertie_y": "66.1%"
     },
     "nl": {
       "regio": "BOVENBEEN (Posterieur)",
@@ -406,10 +406,10 @@ export const MUSCLES: Muscle[] = [
     "naam": "M. semimembranosus",
     "visualisatie": {
       "basis_weergave": "skelet_achter.png",
-      "origo_x": "50%",
-      "origo_y": "30%",
-      "insertie_x": "50%",
-      "insertie_y": "60%"
+      "origo_x": "33.3%",
+      "origo_y": "33.2%",
+      "insertie_x": "28.0%",
+      "insertie_y": "65.8%"
     },
     "nl": {
       "regio": "BOVENBEEN (Posterieur)",
@@ -431,10 +431,10 @@ export const MUSCLES: Muscle[] = [
     "naam": "M. tensor fasciae latae",
     "visualisatie": {
       "basis_weergave": "skelet_voor.png",
-      "origo_x": "50%",
-      "origo_y": "30%",
-      "insertie_x": "50%",
-      "insertie_y": "60%"
+      "origo_x": "9.9%",
+      "origo_y": "18.8%",
+      "insertie_x": "11.1%",
+      "insertie_y": "61.3%"
     },
     "nl": {
       "regio": "BOVENBEEN (Lateraal)",
@@ -456,10 +456,10 @@ export const MUSCLES: Muscle[] = [
     "naam": "M. tibialis anterior",
     "visualisatie": {
       "basis_weergave": "skelet_voor.png",
-      "origo_x": "50%",
-      "origo_y": "30%",
-      "insertie_x": "50%",
-      "insertie_y": "60%"
+      "origo_x": "19.3%",
+      "origo_y": "67.5%",
+      "insertie_x": "24.8%",
+      "insertie_y": "91.2%"
     },
     "nl": {
       "regio": "ONDERBEEN (Anterieur)",
@@ -481,10 +481,10 @@ export const MUSCLES: Muscle[] = [
     "naam": "M. extensor hallucis longus",
     "visualisatie": {
       "basis_weergave": "skelet_voor.png",
-      "origo_x": "50%",
-      "origo_y": "30%",
-      "insertie_x": "50%",
-      "insertie_y": "60%"
+      "origo_x": "17.4%",
+      "origo_y": "82.6%",
+      "insertie_x": "20.9%",
+      "insertie_y": "98.5%"
     },
     "nl": {
       "regio": "ONDERBEEN (Anterieur)",
@@ -506,10 +506,10 @@ export const MUSCLES: Muscle[] = [
     "naam": "M. extensor digitorum longus",
     "visualisatie": {
       "basis_weergave": "skelet_voor.png",
-      "origo_x": "50%",
-      "origo_y": "30%",
-      "insertie_x": "50%",
-      "insertie_y": "60%"
+      "origo_x": "15.8%",
+      "origo_y": "71.5%",
+      "insertie_x": "17.8%",
+      "insertie_y": "92.5%"
     },
     "nl": {
       "regio": "ONDERBEEN (Anterieur)",
@@ -531,10 +531,10 @@ export const MUSCLES: Muscle[] = [
     "naam": "M. fibularis tertius",
     "visualisatie": {
       "basis_weergave": "skelet_voor.png",
-      "origo_x": "50%",
-      "origo_y": "30%",
-      "insertie_x": "50%",
-      "insertie_y": "60%"
+      "origo_x": "17.4%",
+      "origo_y": "81.8%",
+      "insertie_x": "12.3%",
+      "insertie_y": "93.2%"
     },
     "nl": {
       "regio": "ONDERBEEN (Anterieur)",
@@ -556,10 +556,10 @@ export const MUSCLES: Muscle[] = [
     "naam": "M. fibularis longus",
     "visualisatie": {
       "basis_weergave": "skelet_voor.png",
-      "origo_x": "50%",
-      "origo_y": "30%",
-      "insertie_x": "50%",
-      "insertie_y": "60%"
+      "origo_x": "11.5%",
+      "origo_y": "67.4%",
+      "insertie_x": "19.7%",
+      "insertie_y": "91.7%"
     },
     "nl": {
       "regio": "ONDERBEEN (Lateraal)",
@@ -581,10 +581,10 @@ export const MUSCLES: Muscle[] = [
     "naam": "M. fibularis brevis",
     "visualisatie": {
       "basis_weergave": "skelet_voor.png",
-      "origo_x": "50%",
-      "origo_y": "30%",
-      "insertie_x": "50%",
-      "insertie_y": "60%"
+      "origo_x": "14.2%",
+      "origo_y": "79.4%",
+      "insertie_x": "11.5%",
+      "insertie_y": "93.4%"
     },
     "nl": {
       "regio": "ONDERBEEN (Lateraal)",
@@ -606,10 +606,10 @@ export const MUSCLES: Muscle[] = [
     "naam": "M. gastrocnemius",
     "visualisatie": {
       "basis_weergave": "skelet_achter.png",
-      "origo_x": "50%",
-      "origo_y": "30%",
-      "insertie_x": "50%",
-      "insertie_y": "60%"
+      "origo_x": "21.5%",
+      "origo_y": "56.0%",
+      "insertie_x": "24.0%",
+      "insertie_y": "95.9%"
     },
     "nl": {
       "regio": "ONDERBEEN (Posterieur) - Oppervlakkig",
@@ -631,10 +631,10 @@ export const MUSCLES: Muscle[] = [
     "naam": "M. soleus",
     "visualisatie": {
       "basis_weergave": "skelet_achter.png",
-      "origo_x": "50%",
-      "origo_y": "30%",
-      "insertie_x": "50%",
-      "insertie_y": "60%"
+      "origo_x": "19.1%",
+      "origo_y": "62.3%",
+      "insertie_x": "24.4%",
+      "insertie_y": "95.8%"
     },
     "nl": {
       "regio": "ONDERBEEN (Posterieur) - Oppervlakkig",
@@ -656,10 +656,10 @@ export const MUSCLES: Muscle[] = [
     "naam": "M. plantaris",
     "visualisatie": {
       "basis_weergave": "skelet_achter.png",
-      "origo_x": "50%",
-      "origo_y": "30%",
-      "insertie_x": "50%",
-      "insertie_y": "60%"
+      "origo_x": "14.2%",
+      "origo_y": "55.9%",
+      "insertie_x": "25.2%",
+      "insertie_y": "95.9%"
     },
     "nl": {
       "regio": "ONDERBEEN (Posterieur) - Oppervlakkig",
@@ -681,10 +681,10 @@ export const MUSCLES: Muscle[] = [
     "naam": "M. popliteus",
     "visualisatie": {
       "basis_weergave": "skelet_achter.png",
-      "origo_x": "50%",
-      "origo_y": "30%",
-      "insertie_x": "50%",
-      "insertie_y": "60%"
+      "origo_x": "19.1%",
+      "origo_y": "58.2%",
+      "insertie_x": "22.0%",
+      "insertie_y": "64.8%"
     },
     "nl": {
       "regio": "ONDERBEEN (Posterieur) - Diep",
@@ -706,10 +706,10 @@ export const MUSCLES: Muscle[] = [
     "naam": "M. tibialis posterieur",
     "visualisatie": {
       "basis_weergave": "skelet_achter.png",
-      "origo_x": "50%",
-      "origo_y": "30%",
-      "insertie_x": "50%",
-      "insertie_y": "60%"
+      "origo_x": "17.1%",
+      "origo_y": "71.0%",
+      "insertie_x": "29.7%",
+      "insertie_y": "96.2%"
     },
     "nl": {
       "regio": "ONDERBEEN (Posterieur) - Diep",
@@ -731,10 +731,10 @@ export const MUSCLES: Muscle[] = [
     "naam": "M. flexor hallucis longus",
     "visualisatie": {
       "basis_weergave": "skelet_achter.png",
-      "origo_x": "50%",
-      "origo_y": "30%",
-      "insertie_x": "50%",
-      "insertie_y": "60%"
+      "origo_x": "15.9%",
+      "origo_y": "81.6%",
+      "insertie_x": "15.9%",
+      "insertie_y": "98.0%"
     },
     "nl": {
       "regio": "ONDERBEEN (Posterieur) - Diep",
@@ -756,10 +756,10 @@ export const MUSCLES: Muscle[] = [
     "naam": "M. flexor digitorum longus",
     "visualisatie": {
       "basis_weergave": "skelet_achter.png",
-      "origo_x": "50%",
-      "origo_y": "30%",
-      "insertie_x": "50%",
-      "insertie_y": "60%"
+      "origo_x": "23.2%",
+      "origo_y": "73.5%",
+      "insertie_x": "11.0%",
+      "insertie_y": "97.8%"
     },
     "nl": {
       "regio": "ONDERBEEN (Posterieur) - Diep",

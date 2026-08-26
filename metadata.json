@@ -2,5 +2,7 @@
   "name": "MSK coach",
   "description": "A Progressive Web App for physiotherapy students to learn anatomy (muscles).",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }
