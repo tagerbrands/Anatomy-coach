@@ -185,6 +185,150 @@ const ViewToggle = ({ side, setSide, language }: { side: 'voor'|'achter', setSid
   </div>
 );
 
+
+function MusclePlayfield({ muscle, language, children, showSuccess, successText, overlayTitle, isPinPoint, pinPointTarget, onPinPointClick, pinPointClick, pinPointFeedback, pinPointSide }: any) {
+  const t = {
+    nl: { origo: 'Origo', insertion: 'Insertie', correct: 'Goed!' },
+    en: { origo: 'Origin', insertion: 'Insertion', correct: 'Correct!' }
+  };
+  const sides = getRequiredSides(muscle);
+  return (
+    <div className="relative flex-1 min-h-0 mb-4 bg-slate-900/60 rounded-3xl border border-white/10 overflow-hidden shadow-[inset_0_0_50px_rgba(0,0,0,0.5)] flex flex-col p-2 sm:p-4">
+      <AnimatePresence>
+        {showSuccess && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-30 flex items-center justify-center bg-emerald-500/20 backdrop-blur-sm"
+          >
+            <motion.div 
+              initial={{ y: 20 }}
+              animate={{ y: 0 }}
+              className="bg-emerald-500 text-white font-black text-3xl sm:text-5xl px-8 py-4 rounded-3xl shadow-[0_0_40px_rgba(16,185,129,0.8)] border border-white/20 text-center"
+            >
+              {successText || t[language].correct + " 🎉"}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
+      {overlayTitle && (
+        <div className="absolute top-4 left-0 right-0 z-20 text-center pointer-events-none px-4">
+          <h2 className="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-slate-100 to-slate-400 drop-shadow-md">
+            {overlayTitle}
+          </h2>
+        </div>
+      )}
+
+      <div className="flex w-full h-full items-center justify-center pt-8 overflow-hidden min-h-0 shrink gap-2 sm:gap-8">
+        {sides.map(side => {
+           const isCurrentSidePinPoint = pinPointSide === side;
+           return (
+             <div 
+               key={side} 
+               className={`relative inline-block min-h-0 shrink h-full ${isPinPoint ? 'cursor-crosshair' : ''}`}
+               onClick={isPinPoint && onPinPointClick ? (e) => {
+                 const rect = e.currentTarget.getBoundingClientRect();
+                 const x = ((e.clientX - rect.left) / rect.width) * 100;
+                 const y = ((e.clientY - rect.top) / rect.height) * 100;
+                 onPinPointClick(e, x, y, side);
+               } : undefined}
+             >
+               <img 
+                 src={getRegionImage(muscle, side)} 
+                 alt={`Skelet ${side}`} 
+                 className="block pointer-events-none opacity-80 mix-blend-screen h-full max-h-[42vh] sm:max-h-[55vh] w-auto object-contain shrink"
+                 onError={(e) => { e.currentTarget.src = "https://placehold.co/400x800/1e293b/334155?text=Skelet"; }}
+               />
+               
+               {muscle.visualisatie.some((p: any) => p.image.includes(side)) && !isPinPoint && (
+                 <>
+                   <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible">
+                     <defs>
+                       <linearGradient id="neonGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                         <stop offset="0%" stopColor="#22d3ee" />
+                         <stop offset="100%" stopColor="#e879f9" />
+                       </linearGradient>
+                       <filter id="neonGlowThick">
+                         <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                         <feMerge>
+                           <feMergeNode in="coloredBlur"/>
+                           <feMergeNode in="SourceGraphic"/>
+                         </feMerge>
+                       </filter>
+                     </defs>
+                     {muscle.visualisatie.filter((p: any) => p.image.includes(side) && p.type === 'origo').map((origo: any, oIdx: number) => (
+                       muscle.visualisatie.filter((p: any) => p.image.includes(side) && p.type === 'insertie').map((insertie: any, iIdx: number) => (
+                         <line 
+                           key={`line-${oIdx}-${iIdx}`}
+                           x1={origo.x} 
+                           y1={origo.y} 
+                           x2={insertie.x} 
+                           y2={insertie.y} 
+                           stroke="url(#neonGradient)" 
+                           strokeWidth="6"
+                           strokeLinecap="round"
+                           filter="url(#neonGlowThick)"
+                           className="opacity-90"
+                         />
+                       ))
+                     ))}
+                   </svg>
+                   {muscle.visualisatie.filter((p: any) => p.image.includes(side)).map((point: any, idx: number) => (
+                     <div 
+                       key={`dot-${idx}`}
+                       className={`absolute w-4 h-4 rounded-full border-2 border-slate-900 -translate-x-1/2 -translate-y-1/2 z-10 ${point.type === 'origo' ? 'bg-fuchsia-400 shadow-[0_0_15px_rgba(232,121,249,0.8)]' : 'bg-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.8)]'}`}
+                       style={{ left: point.x, top: point.y }}
+                     >
+                       <div className={`absolute ${point.type === 'origo' ? '-top-6' : '-bottom-6'} left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-wider bg-slate-900/80 px-2 py-0.5 rounded-full border ${point.type === 'origo' ? 'text-fuchsia-300 border-fuchsia-500/30' : 'text-cyan-300 border-cyan-500/30'}`}>
+                         {point.type === 'origo' ? t[language as keyof typeof t].origo : t[language as keyof typeof t].insertion}
+                       </div>
+                     </div>
+                   ))}
+                 </>
+               )}
+
+               {isPinPoint && isCurrentSidePinPoint && pinPointClick && pinPointFeedback && (
+                 <>
+                   {muscle.visualisatie.some((p: any) => p.image.includes(side)) && (
+                     <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible">
+                       {muscle.visualisatie.filter((p: any) => p.type === pinPointTarget && p.image.includes(side)).map((target: any, idx: number) => (
+                         <line 
+                           key={`pp-line-${idx}`}
+                           x1={`${pinPointClick.x}%`} 
+                           y1={`${pinPointClick.y}%`} 
+                           x2={target.x} 
+                           y2={target.y} 
+                           stroke="rgba(255,255,255,0.3)" 
+                           strokeWidth="2"
+                           strokeDasharray="4 4"
+                         />
+                       ))}
+                     </svg>
+                   )}
+                   <div 
+                     className="absolute w-4 h-4 rounded-full bg-white border-2 border-slate-900 shadow-[0_0_15px_rgba(255,255,255,0.8)] -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none"
+                     style={{ left: `${pinPointClick.x}%`, top: `${pinPointClick.y}%` }}
+                   />
+                   {muscle.visualisatie.filter((p: any) => p.type === pinPointTarget && p.image.includes(side)).map((target: any, idx: number) => (
+                     <div 
+                       key={`pp-target-${idx}`}
+                       className={`absolute w-5 h-5 rounded-full border-2 border-slate-900 -translate-x-1/2 -translate-y-1/2 z-10 ${pinPointFeedback.distance < 3 ? 'bg-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.8)]' : 'bg-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.8)]'}`}
+                       style={{ left: target.x, top: target.y }}
+                     />
+                   ))}
+                 </>
+               )}
+             </div>
+           );
+        })}
+      </div>
+      {children}
+    </div>
+  );
+}
+
 export default function App() {
   const [language, setLanguage] = useState<Language>(() => {
     return (localStorage.getItem('language') as Language) || 'nl';
@@ -195,8 +339,21 @@ export default function App() {
   }, [language]);
 
   const [activeTab, setActiveTab] = useState<'bieb' | 'oefenen' | 'pinpoint' | 'zenuwen' | 'quiz'>('bieb');
+
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterRegion, setFilterRegion] = useState('all');
   const [selectedMuscle, setSelectedMuscle] = useState<Muscle | null>(null);
+
+  const filteredMuscles = useMemo(() => {
+    return MUSCLES.filter((m: any) => {
+      const matchesSearch = m.naam.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          (m.origo && m.origo.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                          (m.insertie && m.insertie.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchesFilter = filterRegion === 'all' || m.regio === filterRegion;
+      return matchesSearch && matchesFilter;
+    });
+  }, [searchQuery, filterRegion]);
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);      
 
 
@@ -299,26 +456,21 @@ export default function App() {
 
   const handleShareScore = async () => {
     if (!flexCardRef.current || isSharing) return;
-    
     setIsSharing(true);
+    
     try {
       const canvas = await html2canvas(flexCardRef.current, {
-        backgroundColor: '#020617', // slate-950 fallback
         scale: 2,
-        logging: false,
-        useCORS: true
+        backgroundColor: '#020617',
       });
-
+      
       canvas.toBlob(async (blob) => {
-        if (!blob) {
-          setIsSharing(false);
-          return;
-        }
-
-        const file = new File([blob], `anatomy-vibe-streak-${streak}.png`, { type: 'image/png' });
+        if (!blob) return;
+        const file = new File([blob], 'highscore.png', { type: 'image/png' });
+        
         const shareData = {
-          title: 'Anatomy Vibe Highscore',
-          text: t[language].shareTextStreak.replace("{streak}", streak.toString()).replace("{rank}", getStreakTitle(streak)),
+          title: 'MSK Coach Highscore',
+          text: `Ik heb een streak van ${streak} in MSK Coach!`,
           files: [file]
         };
 
@@ -326,99 +478,26 @@ export default function App() {
           try {
             await navigator.share(shareData);
           } catch (err) {
-            console.log("Gebruiker heeft share geannuleerd of er ging iets mis:", err);
+            console.log("Gebruiker heeft share geannuleerd:", err);
           }
         } else {
           // Fallback download
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = file.name;
-          document.body.appendChild(a);
+          a.download = 'msk-highscore.png';
           a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
         }
-        setIsSharing(false);
       }, 'image/png');
     } catch (err) {
-      console.error("Error generating share image:", err);
+      console.error('Error sharing score', err);
+    } finally {
       setIsSharing(false);
     }
   };
 
-  const filteredMuscles = useMemo(() => {
-    return MUSCLES.filter(m => {
-      return m.naam.toLowerCase().includes(searchQuery.toLowerCase());
-    });
-  }, [searchQuery]);
 
-  // Pin-Point Logic
-  useEffect(() => {
-    if (activeTab === 'pinpoint' && !pinPointMuscle && !isPinPointFinished) {
-      pickRandomPinPoint();
-    }
-  }, [activeTab]);
-
-  const startNewPinPointSession = () => {
-    setPinPointRound(1);
-    setPinPointXp(0);
-    setPinPointHistory([]);
-    setIsPinPointFinished(false);
-    pickRandomPinPoint();
-  };
-
-  const pickRandomPinPoint = () => {
-    const randomMuscle = MUSCLES[Math.floor(Math.random() * MUSCLES.length)];
-    setPinPointMuscle(randomMuscle);
-    setPinPointTarget(Math.random() > 0.5 ? 'origo' : 'insertie');
-    setPinPointClick(null);
-    setPinPointFeedback(null);
-  };
-
-  const [pinPointSide, setPinPointSide] = React.useState<'voor' | 'achter'>('voor');
-  const handlePinPointClick = (e: React.MouseEvent<HTMLDivElement>, x: number, y: number, side: 'voor' | 'achter') => {
-    if (pinPointClick || !pinPointMuscle) return; // already clicked
-
-    setPinPointClick({ x, y });
-    setPinPointSide(side);
-
-    // Find all valid targets on the current side
-    const validTargets = pinPointMuscle.visualisatie.filter(p => p.type === pinPointTarget && p.image.includes(side));
-    
-    let minDistance = Infinity;
-    
-    if (validTargets.length > 0) {
-      validTargets.forEach(target => {
-        const actualX = parseFloat(target.x);
-        const actualY = parseFloat(target.y);
-        const d = Math.sqrt(Math.pow(x - actualX, 2) + Math.pow(y - actualY, 2));
-        if (d < minDistance) minDistance = d;
-      });
-    }
-
-    let xp = 0;
-    let message = t[language].miss;
-    
-    if (minDistance < 3) { xp = 100; message = t[language].bullseye; }
-    else if (minDistance < 6) { xp = 75; message = t[language].great; }
-    else if (minDistance < 10) { xp = 50; message = t[language].close; }
-
-    setPinPointXp(prev => prev + xp);
-    setPinPointFeedback({ distance: minDistance, xp, message });
-    setPinPointHistory(prev => [...prev, { naam: pinPointMuscle.naam, target: pinPointTarget, distance: minDistance, xp }]);
-    setTimeout(() => { handlePinPointNext(); }, 1200);
-  };
-
-  const handlePinPointNext = () => {
-    if (pinPointRound >= 10) {
-      setIsPinPointFinished(true);
-    } else {
-      setPinPointRound(r => r + 1);
-      pickRandomPinPoint();
-    }
-  };
-
+  // PinPoint Functions (Recovered)
   const getPinPointRank = (score: number) => {
     if (score < 400) return 'Anatomie Tourist';
     if (score < 800) return 'Klinisch Redeneerder';
@@ -435,61 +514,121 @@ export default function App() {
     return [...pinPointHistory].sort((a, b) => b.distance - a.distance)[0];
   }, [pinPointHistory]);
 
-  
-  
   const handleSharePinPoint = async () => {
-    if (isSharing) return;
+    if (!flexCardRef.current || isSharing) return;
     setIsSharing(true);
     try {
-      const shareData: any = {
-        title: 'MSK Coach Locatie Score',
-        text: t[language].shareTextPinPoint.replace("{xp}", pinPointXp.toString()).replace("{rank}", getPinPointRank(pinPointXp)),
-      };
-      
-      if (pinPointShareFile) {
-        shareData.files = [pinPointShareFile];
-      }
-
-      if (navigator.canShare && (pinPointShareFile ? navigator.canShare({ files: shareData.files }) : navigator.canShare({ text: shareData.text }))) {
-        await navigator.share(shareData);
-      } else if (pinPointShareFile) {
-        const url = URL.createObjectURL(pinPointShareFile);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = pinPointShareFile.name;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }
+      const canvas = await html2canvas(flexCardRef.current, { scale: 2, backgroundColor: '#020617' });
+      canvas.toBlob(async (blob) => {
+        if (!blob) return;
+        const file = new File([blob], 'pinpoint-highscore.png', { type: 'image/png' });
+        if (navigator.share && navigator.canShare({ files: [file] })) {
+          await navigator.share({ title: 'MSK Coach PinPoint', text: `Ik heb ${pinPointXp} XP gehaald in Pin-Point Anatomie!`, files: [file] });
+        } else {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'pinpoint-highscore.png';
+          a.click();
+        }
+      }, 'image/png');
     } catch (err) {
-      console.error(err);
+      console.error('Error sharing pinpoint score', err);
+    } finally {
+      setIsSharing(false);
     }
-    setIsSharing(false);
   };
 
-  useEffect(() => {
-    if (isPinPointFinished && pinPointFlexCardRef.current) {
-      setTimeout(() => {
-        html2canvas(pinPointFlexCardRef.current!, {
-          backgroundColor: '#020617',
-          scale: 2,
-          logging: false,
-          useCORS: true
-        }).then(canvas => {
-          canvas.toBlob(blob => {
-            if (blob) {
-              setPinPointShareFile(new File([blob], `anatomy-vibe-pinpoint-${pinPointXp}.png`, { type: 'image/png' }));
-            }
-          }, 'image/png');
-        }).catch(err => console.error(err));
-      }, 500); // Give it a bit to render
-    } else {
-      setPinPointShareFile(null);
-    }
-  }, [isPinPointFinished, pinPointXp]);
+  const startNewPinPointSession = () => {
+    setPinPointRound(1);
+    setPinPointXp(0);
+    setPinPointHistory([]);
+    setIsPinPointFinished(false);
+    pickRandomPinPoint();
+  };
 
-  
+  const [pinPointSide, setPinPointSide] = React.useState<'voor' | 'achter'>('voor');
+  const handlePinPointClick = (e: React.MouseEvent<HTMLDivElement>, x: number, y: number, side: 'voor' | 'achter') => {
+    if (pinPointClick || !pinPointMuscle) return;
+
+    setPinPointClick({ x, y });
+    setPinPointSide(side);
+
+    const validTargets = pinPointMuscle.visualisatie.filter((p: any) => p.type === pinPointTarget && p.image.includes(side));
+    
+    let minDistance = Infinity;
+    if (validTargets.length > 0) {
+      validTargets.forEach((target: any) => {
+        const actualX = parseFloat(target.x);
+        const actualY = parseFloat(target.y);
+        const d = Math.sqrt(Math.pow(x - actualX, 2) + Math.pow(y - actualY, 2));
+        if (d < minDistance) minDistance = d;
+      });
+    } else {
+      minDistance = 50; // Wrong side penalty
+    }
+
+    let xp = 0;
+    let message = t[language as keyof typeof t].miss;
+    
+    if (minDistance < 3) { xp = 100; message = t[language as keyof typeof t].bullseye; }
+    else if (minDistance < 6) { xp = 75; message = t[language as keyof typeof t].great; }
+    else if (minDistance < 10) { xp = 50; message = t[language as keyof typeof t].close; }
+
+    setPinPointXp((prev: number) => prev + xp);
+    setPinPointFeedback({ distance: minDistance, xp, message });
+    setPinPointHistory((prev: any) => [...prev, { naam: pinPointMuscle.naam, target: pinPointTarget, distance: minDistance, xp }]);
+    setTimeout(() => { handlePinPointNext(); }, 1200);
+  };
+
+  const pickRandomPinPoint = () => {
+    const randomMuscle = MUSCLES[Math.floor(Math.random() * MUSCLES.length)];
+    setPinPointMuscle(randomMuscle);
+    setPinPointTarget(Math.random() > 0.5 ? 'origo' : 'insertie');
+    setPinPointClick(null);
+    setPinPointFeedback(null);
+  };
+
+  const handlePinPointNext = () => {
+    if (pinPointRound >= 10) {
+      setIsPinPointFinished(true);
+    } else {
+      setPinPointRound((r: number) => r + 1);
+      pickRandomPinPoint();
+    }
+  };
+
+  const handleShareQuiz = async () => {
+    if (!flexCardRef.current || isSharing) return;
+    setIsSharing(true);
+    try {
+      const canvas = await html2canvas(flexCardRef.current, { scale: 2, backgroundColor: '#020617' });
+      canvas.toBlob(async (blob) => {
+        if (!blob) return;
+        const file = new File([blob], 'quiz-highscore.png', { type: 'image/png' });
+        if (navigator.share && navigator.canShare({ files: [file] })) {
+          await navigator.share({ title: 'MSK Coach Quiz Highscore', text: `Ik heb een streak van ${quizStreak} in de Anatomie Quiz!`, files: [file] });
+        } else {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'quiz-highscore.png';
+          a.click();
+        }
+      }, 'image/png');
+    } catch (err) {
+      console.error('Error sharing quiz score', err);
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
+  const handleQuizInfoClick = () => {
+    if (quizMuscle) {
+      setSelectedMuscle(quizMuscle);
+    }
+  };
+
   // Quiz Logic
 
   useEffect(() => {
@@ -957,142 +1096,63 @@ const handleMovementClick = (movement: string) => {
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col flex-1 min-h-0 w-full max-w-2xl mx-auto"
           >
-            {/* Oefenen Top Bar */}
-            <div className="flex justify-between items-center mb-2 bg-white/5 backdrop-blur-md rounded-xl p-2 px-3 border border-white/10 shrink-0">
-              <h2 className="text-base font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-100 to-slate-400">
-                {currentPracticeMuscle.naam}
-              </h2>
-            </div>
+            <MusclePlayfield 
+              muscle={currentPracticeMuscle} 
+              language={language} 
+              showSuccess={showSuccessAnimation} 
+              overlayTitle={currentPracticeMuscle.naam}
+            >
+              {/* Controls */}
+              <div className="flex flex-col gap-4 shrink-0 pb-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+                  {practiceOptions.map(movement => {
+                    const status = guessedMovements[movement];
+                    const isShaking = shakeMovement === movement;
+                    let btnClass = "bg-white/5 text-slate-300 border-white/10 hover:bg-white/10";
+                    
+                    if (status === 'correct') {
+                      btnClass = "bg-emerald-500/20 text-emerald-300 border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.2)]";
+                    } else if (status === 'incorrect') {
+                      btnClass = "bg-rose-500/20 text-rose-300 border-rose-500/50";
+                    }
 
-            {/* Playfield */}
-            <div className="relative flex-1 min-h-0 mb-4 bg-slate-900/60 rounded-3xl border border-white/10 overflow-hidden shadow-[inset_0_0_50px_rgba(0,0,0,0.5)] flex items-center justify-center p-2 sm:p-4">
-              <AnimatePresence>
-                {showSuccessAnimation && (
-                  <motion.div 
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="absolute inset-0 z-20 flex items-center justify-center bg-emerald-500/20 backdrop-blur-sm"
-                  >
-                    <motion.div 
-                      initial={{ y: 20 }}
-                      animate={{ y: 0 }}
-                      className="bg-emerald-500 text-white font-black text-3xl sm:text-5xl px-8 py-4 rounded-3xl shadow-[0_0_40px_rgba(16,185,129,0.8)] border border-white/20"
-                    >
-                      {t[language].correct} 🎉
-                    </motion.div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-                            
-              <div className="flex w-full h-full items-center justify-center pt-8 overflow-hidden min-h-0 shrink">
-                <div className="relative inline-block min-h-0 shrink">
-                  <img 
-                    src={getRegionImage(currentPracticeMuscle, "voor")} 
-                    alt="Skelet" 
-                    className="block pointer-events-none opacity-80 mix-blend-screen max-h-[42vh] sm:max-h-[55vh] w-auto object-contain shrink"
-                    onError={(e) => { e.currentTarget.src = "https://placehold.co/400x800/1e293b/334155?text=Skelet"; }}
-                  />
-                  {currentPracticeMuscle && currentPracticeMuscle.visualisatie.some(p => p.image.includes("voor")) && (
-                    <>
-                  <svg className="absolute inset-0 w-full h-full pointer-events-none">
-                    <defs>
-                      <linearGradient id="neonGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#22d3ee" />
-                        <stop offset="100%" stopColor="#e879f9" />
-                      </linearGradient>
-                      <filter id="neonGlowThick">
-                        <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
-                        <feMerge>
-                          <feMergeNode in="coloredBlur"/>
-                          <feMergeNode in="SourceGraphic"/>
-                        </feMerge>
-                      </filter>
-                    </defs>
-                    {currentPracticeMuscle.visualisatie.filter(p => p.image.includes("voor") && p.type === 'origo').map((origo, oIdx) => (
-                      currentPracticeMuscle.visualisatie.filter(p => p.image.includes("voor") && p.type === 'insertie').map((insertie, iIdx) => (
-                        <line 
-                          key={`line-${oIdx}-${iIdx}`}
-                          x1={origo.x} 
-                          y1={origo.y} 
-                          x2={insertie.x} 
-                          y2={insertie.y} 
-                          stroke="url(#neonGradient)" 
-                          strokeWidth="6"
-                          strokeLinecap="round"
-                          filter="url(#neonGlowThick)"
-                          className="opacity-90"
-                        />
-                      ))
-                    ))}
-                  </svg>
-                  {/* Dots */}
-                  {currentPracticeMuscle.visualisatie.filter(p => p.image.includes("voor")).map((point, idx) => (
-                    <div 
-                      key={`dot-${idx}`}
-                      className={`absolute w-4 h-4 rounded-full border-2 border-slate-900 -translate-x-1/2 -translate-y-1/2 z-10 ${point.type === 'origo' ? 'bg-fuchsia-400 shadow-[0_0_15px_rgba(232,121,249,0.8)]' : 'bg-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.8)]'}`}
-                      style={{ left: point.x, top: point.y }}
-                    >
-                      <div className={`absolute ${point.type === 'origo' ? '-top-6' : '-bottom-6'} left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-wider bg-slate-900/80 px-2 py-0.5 rounded-full border ${point.type === 'origo' ? 'text-fuchsia-300 border-fuchsia-500/30' : 'text-cyan-300 border-cyan-500/30'}`}>
-                        {point.type === 'origo' ? t[language].origo : t[language].insertion}
-                      </div>
-                    </div>
-                  ))}
-                    </>
-                  )}
+                    return (
+                      <button
+                        key={t[language].movements[movement as keyof typeof t.nl.movements]}
+                        onClick={() => handleMovementClick(movement)}
+                        className={`p-3 rounded-xl border font-medium text-sm transition-all active:scale-95 ${btnClass} ${isShaking ? 'animate-shake' : ''}`}
+                      >
+                        {t[language].movements[movement as keyof typeof t.nl.movements]}
+                      </button>
+                    )
+                  })}
                 </div>
-              </div>
-            </div>
-            {/* Controls */}
-            <div className="flex flex-col gap-4 shrink-0 pb-6">
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
-                {practiceOptions.map(movement => {
-                  const status = guessedMovements[movement];
-                  const isShaking = shakeMovement === movement;
-                  let btnClass = "bg-white/5 text-slate-300 border-white/10 hover:bg-white/10";
-                  
-                  if (status === 'correct') {
-                    btnClass = "bg-emerald-500/20 text-emerald-300 border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.2)]";
-                  } else if (status === 'incorrect') {
-                    btnClass = "bg-rose-500/20 text-rose-300 border-rose-500/50";
-                  }
 
-                  return (
-                    <button
-                      key={t[language].movements[movement as keyof typeof t.nl.movements]}
-                      onClick={() => handleMovementClick(movement)}
-                      className={`p-3 rounded-xl border font-medium text-sm transition-all active:scale-95 ${btnClass} ${isShaking ? 'animate-shake' : ''}`}
-                    >
-                      {t[language].movements[movement as keyof typeof t.nl.movements]}
-                    </button>
-                  )
-                })}
-              </div>
-
-              {/* Action Bar */}
-              <div className="flex justify-between items-center mt-2 h-12">
-                <button 
-                  onClick={handleInfoClick}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-slate-200 hover:bg-white/10 transition-colors"
-                >
-                  <Info className="w-5 h-5" />
-                  <span className="font-medium text-sm">{t[language].info}</span>
-                </button>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-500/10 text-rose-400 rounded-full border border-rose-500/20 shadow-[0_0_10px_rgba(244,63,94,0.1)]">
-                    <Flame className="w-4 h-4" />
-                    <span className="font-bold text-sm">{streak} / {MUSCLES.length}</span>
-                  </div>
-                  <button
-                    onClick={handleShareScore}
-                    disabled={isSharing}
-                    className="flex items-center justify-center p-2 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500/20 transition-colors disabled:opacity-50"
+                {/* Action Bar */}
+                <div className="flex justify-between items-center mt-2 h-12">
+                  <button 
+                    onClick={handleInfoClick}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-slate-200 hover:bg-white/10 transition-colors"
                   >
-                    {isSharing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Share2 className="w-4 h-4" />}
+                    <Info className="w-5 h-5" />
+                    <span className="font-medium text-sm">{t[language].info}</span>
                   </button>
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-500/10 text-rose-400 rounded-full border border-rose-500/20 shadow-[0_0_10px_rgba(244,63,94,0.1)]">
+                      <Flame className="w-4 h-4" />
+                      <span className="font-bold text-sm">{streak} / {MUSCLES.length}</span>
+                    </div>
+                    <button
+                      onClick={handleShareScore}
+                      disabled={isSharing}
+                      className="flex items-center justify-center p-2 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500/20 transition-colors disabled:opacity-50"
+                    >
+                      {isSharing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Share2 className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
+            </MusclePlayfield>
           </motion.div>
         )}
 
@@ -1102,98 +1162,65 @@ const handleMovementClick = (movement: string) => {
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col flex-1 min-h-0 w-full max-w-2xl mx-auto"
           >
-            {/* Pin-Point Top Bar */}
-            <div className="flex justify-between items-center mb-4 bg-white/5 backdrop-blur-md rounded-2xl p-4 border border-white/10 shrink-0 relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-1 bg-white/5">
+            <MusclePlayfield 
+              muscle={pinPointMuscle} 
+              language={language}
+              isPinPoint={true}
+              pinPointTarget={pinPointTarget}
+              pinPointClick={pinPointClick}
+              pinPointFeedback={pinPointFeedback}
+              pinPointSide={pinPointSide}
+              onPinPointClick={handlePinPointClick}
+              overlayTitle={
+                <div className="flex flex-col items-center">
+                  <span className="text-sm font-normal text-slate-300 uppercase tracking-widest mb-1 opacity-80">
+                    {t[language].pointTo} <span className={`font-black ${pinPointTarget === 'origo' ? 'text-fuchsia-400' : 'text-cyan-400'}`}>{pinPointTarget}</span>
+                  </span>
+                  <span>{pinPointMuscle.naam}</span>
+                </div>
+              }
+            >
+              {/* Top Progress Bar for PinPoint inside the Playfield */}
+              <div className="absolute top-0 left-0 w-full h-1 bg-white/5 z-20">
                  <div className="h-full bg-gradient-to-r from-cyan-500 to-fuchsia-500 transition-all duration-300" style={{ width: `${(pinPointRound / 10) * 100}%` }} />
               </div>
-              <h2 className="text-sm sm:text-base font-bold text-slate-300">
-                {t[language].pointTo} <span className={`uppercase font-black ${pinPointTarget === 'origo' ? 'text-fuchsia-400' : 'text-cyan-400'}`}>{pinPointTarget}</span> {t[language].ofThe} <br/>
-                <span className="text-lg text-transparent bg-clip-text bg-gradient-to-r from-slate-100 to-slate-400">{pinPointMuscle.naam}</span>
-              </h2>
-              <div className="flex flex-col items-end gap-1">
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">🎯 {t[language].round} {pinPointRound} / 10</div>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 text-amber-400 rounded-full border border-amber-500/20 shadow-[0_0_10px_rgba(244,163,64,0.1)]">
-                  <Trophy className="w-4 h-4" />
-                  <span className="font-bold text-sm">{pinPointXp} XP</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Pin-Point Playfield */}
-            <div className="relative flex-1 min-h-0 mb-4 bg-slate-900/60 rounded-3xl border border-white/10 overflow-hidden shadow-[inset_0_0_50px_rgba(0,0,0,0.5)] flex items-center justify-center p-2 sm:p-4">
-              
-              <div className="flex w-full h-full items-center justify-center pt-8 overflow-hidden relative min-h-0 shrink">
-                <div 
-                  className="relative inline-block cursor-crosshair min-h-0 shrink"
-                  onClick={handlePinPointClick}
-                >
-                  <img 
-                    src={getRegionImage(pinPointMuscle, "voor")} 
-                    alt="Skelet" 
-                    className="block pointer-events-none opacity-80 mix-blend-screen max-h-[42vh] sm:max-h-[55vh] w-auto object-contain shrink"
-                    onError={(e) => { e.currentTarget.src = "https://placehold.co/400x800/1e293b/334155?text=Skelet"; }}
-                  />
-                  {pinPointClick && pinPointFeedback && (
-                    <>
-                      {pinPointMuscle.visualisatie.some(p => p.image.includes(pinPointSide)) && (
-                        <svg className="absolute inset-0 w-full h-full pointer-events-none">
-                          {pinPointMuscle.visualisatie.filter(p => p.type === pinPointTarget && p.image.includes(pinPointSide)).map((target, idx) => (
-                            <line 
-                              key={`pp-line-${idx}`}
-                              x1={`${pinPointClick.x}%`} 
-                              y1={`${pinPointClick.y}%`} 
-                              x2={target.x} 
-                              y2={target.y} 
-                              stroke="rgba(255,255,255,0.3)" 
-                              strokeWidth="2"
-                              strokeDasharray="4 4"
-                            />
-                          ))}
-                        </svg>
-                      )}
-                      {/* User Click Dot */}
-                      <div 
-                        className="absolute w-4 h-4 rounded-full bg-white border-2 border-slate-900 shadow-[0_0_15px_rgba(255,255,255,0.8)] -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none"
-                        style={{ left: `${pinPointClick.x}%`, top: `${pinPointClick.y}%` }}
-                      />
-                      {/* Actual Target Dots */}
-                      {pinPointMuscle.visualisatie.filter(p => p.type === pinPointTarget && p.image.includes(pinPointSide)).map((target, idx) => (
-                        <div 
-                          key={`pp-target-${idx}`}
-                          className={`absolute w-4 h-4 rounded-full border-2 border-slate-900 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none ${pinPointTarget === 'origo' ? 'bg-fuchsia-400 shadow-[0_0_15px_rgba(232,121,249,0.8)]' : 'bg-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.8)]'}`}
-                          style={{ left: target.x, top: target.y }}
-                        >
-                          <div className={`absolute ${pinPointTarget === 'origo' ? '-top-6' : '-bottom-6'} left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-wider bg-slate-900/80 px-2 py-0.5 rounded-full border ${pinPointTarget === 'origo' ? 'text-fuchsia-300 border-fuchsia-500/30' : 'text-cyan-300 border-cyan-500/30'}`}>
-                            {pinPointTarget === 'origo' ? t[language].origo : t[language].insertion}
-                          </div>
-                        </div>
-                      ))}
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
+            </MusclePlayfield>
 
             {/* Pin-Point Feedback Overlay */}
             <AnimatePresence>
-              {pinPointFeedback && (
+              {pinPointFeedback ? (
                 <motion.div
+                  key="feedback"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 20 }}
-                  className="shrink-0 bg-slate-900/80 backdrop-blur-md border border-white/10 rounded-2xl p-5 shadow-2xl"
+                  className="shrink-0 bg-slate-900/80 backdrop-blur-md border border-white/10 rounded-2xl p-5 shadow-2xl flex justify-between items-center"
                 >
-                  <div className="flex justify-between items-center mb-2">
-                    <h3 className="text-xl font-bold text-white">{pinPointFeedback.message}</h3>
-                    <span className={`font-black text-lg ${pinPointFeedback.xp > 0 ? 'text-amber-400' : 'text-slate-500'}`}>
+                  <div>
+                    <h3 className="text-xl font-bold text-white mb-1">{pinPointFeedback.message}</h3>
+                    <p className="text-slate-400 text-sm">
+                      {t[language].distanceText} {pinPointFeedback.distance.toFixed(1)}{t[language].distanceOff}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <span className={`font-black text-2xl ${pinPointFeedback.xp > 0 ? 'text-amber-400' : 'text-slate-500'}`}>
                       +{pinPointFeedback.xp} XP
                     </span>
                   </div>
-                  <p className="text-slate-400 text-sm mb-4">
-                    {t[language].distanceText} {pinPointFeedback.distance.toFixed(1)}{t[language].distanceOff}
-                  </p>
-                  
+                </motion.div>
+              ) : (
+                <motion.div 
+                  key="stats"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex justify-between items-center mt-2 px-2"
+                >
+                  <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">🎯 {t[language].round} {pinPointRound} / 10</div>
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 text-amber-400 rounded-full border border-amber-500/20 shadow-[0_0_10px_rgba(244,163,64,0.1)]">
+                    <Trophy className="w-4 h-4" />
+                    <span className="font-bold text-sm">{pinPointXp} XP</span>
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -1349,65 +1376,11 @@ const handleMovementClick = (movement: string) => {
               </div>
 
               {/* Added Visualizer to Bieb */}
-              <div className="flex justify-center bg-slate-950/50 rounded-2xl border border-white/5 py-4 mb-6">
-                <div className="w-full flex flex-col items-center"><div className="flex w-full items-center justify-center overflow-hidden min-h-0 shrink">
-                    <div className="relative inline-block mt-2 min-h-0 shrink">
-                      <img 
-                        src={getRegionImage(selectedMuscle, "voor")} 
-                        alt="Skelet" 
-                        className="block pointer-events-none opacity-80 mix-blend-screen max-h-[42vh] sm:max-h-[55vh] w-auto object-contain shrink"
-                        onError={(e) => { e.currentTarget.src = "https://placehold.co/400x800/1e293b/334155?text=Skelet"; }}
-                      />
-                      {selectedMuscle && selectedMuscle.visualisatie.some(p => p.image.includes("voor")) && (
-                        <>
-                  <svg className="absolute inset-0 w-full h-full pointer-events-none">
-                    <defs>
-                      <linearGradient id="neonGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#22d3ee" />
-                        <stop offset="100%" stopColor="#e879f9" />
-                      </linearGradient>
-                      <filter id="neonGlowThick">
-                        <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
-                        <feMerge>
-                          <feMergeNode in="coloredBlur"/>
-                          <feMergeNode in="SourceGraphic"/>
-                        </feMerge>
-                      </filter>
-                    </defs>
-                    {selectedMuscle.visualisatie.filter(p => p.image.includes("voor") && p.type === 'origo').map((origo, oIdx) => (
-                      selectedMuscle.visualisatie.filter(p => p.image.includes("voor") && p.type === 'insertie').map((insertie, iIdx) => (
-                        <line 
-                          key={`line-${oIdx}-${iIdx}`}
-                          x1={origo.x} 
-                          y1={origo.y} 
-                          x2={insertie.x} 
-                          y2={insertie.y} 
-                          stroke="url(#neonGradient)" 
-                          strokeWidth="6"
-                          strokeLinecap="round"
-                          filter="url(#neonGlowThick)"
-                          className="opacity-90"
-                        />
-                      ))
-                    ))}
-                  </svg>
-                  {/* Dots */}
-                  {selectedMuscle.visualisatie.filter(p => p.image.includes("voor")).map((point, idx) => (
-                    <div 
-                      key={`dot-${idx}`}
-                      className={`absolute w-4 h-4 rounded-full border-2 border-slate-900 -translate-x-1/2 -translate-y-1/2 z-10 ${point.type === 'origo' ? 'bg-fuchsia-400 shadow-[0_0_15px_rgba(232,121,249,0.8)]' : 'bg-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.8)]'}`}
-                      style={{ left: point.x, top: point.y }}
-                    >
-                      <div className={`absolute ${point.type === 'origo' ? '-top-6' : '-bottom-6'} left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-wider bg-slate-900/80 px-2 py-0.5 rounded-full border ${point.type === 'origo' ? 'text-fuchsia-300 border-fuchsia-500/30' : 'text-cyan-300 border-cyan-500/30'}`}>
-                        {point.type === 'origo' ? t[language].origo : t[language].insertion}
-                      </div>
-                    </div>
-                  ))}
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
+              <div className="flex justify-center bg-slate-950/50 rounded-2xl border border-white/5 py-4 mb-6 min-h-[300px]">
+                <MusclePlayfield 
+                  muscle={selectedMuscle} 
+                  language={language}
+                />
               </div>
 
               <div className="flex flex-col gap-4">
@@ -1429,138 +1402,66 @@ const handleMovementClick = (movement: string) => {
             exit={{ opacity: 0, y: -10 }}
             className="flex flex-col h-full max-w-2xl mx-auto w-full"
           >
-            {/* Header: Streak */}
-            <div className="flex justify-between items-center mb-4 px-2 shrink-0">
-              <h2 className="text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-teal-400 drop-shadow-sm flex items-center gap-2">
-                <HelpCircle className="w-6 h-6 text-emerald-400" />
-                {t[language].quiz}
-              </h2>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500/10 text-orange-400 rounded-full border border-orange-500/20 shadow-[0_0_10px_rgba(249,115,22,0.1)]">
-                  <Flame className="w-4 h-4" />
-                  <span className="font-bold text-sm">{quizStreak}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Playfield */}
-            <div className="relative flex-1 min-h-0 mb-4 bg-slate-900/60 rounded-3xl border border-white/10 overflow-hidden shadow-[inset_0_0_50px_rgba(0,0,0,0.5)] flex items-center justify-center p-2 sm:p-4">
-              <AnimatePresence>
-                {showSuccessAnimation && (
-                  <motion.div 
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="absolute inset-0 z-20 flex items-center justify-center bg-emerald-500/20 backdrop-blur-sm"
-                  >
-                    <motion.div 
-                      initial={{ y: 20 }}
-                      animate={{ y: 0 }}
-                      className="bg-emerald-500 text-white font-black text-3xl sm:text-5xl px-8 py-4 rounded-3xl shadow-[0_0_40px_rgba(16,185,129,0.8)] border border-white/20"
-                    >
-                      {t[language].correct} 🎉
-                    </motion.div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-              
-              
-              <div className="flex w-full h-full items-center justify-center pt-8 overflow-hidden min-h-0 shrink">
-                <div className="relative inline-block min-h-0 shrink">
-                  <img 
-                    src={getRegionImage(quizMuscle, "voor")} 
-                    alt="Skelet" 
-                    className="block pointer-events-none opacity-80 mix-blend-screen max-h-[42vh] sm:max-h-[55vh] w-auto object-contain shrink"
-                    onError={(e) => { e.currentTarget.src = "https://placehold.co/400x800/1e293b/334155?text=Skelet"; }}
-                  />
-                  {quizMuscle && quizMuscle.visualisatie.some(p => p.image.includes("voor")) && (
-                    <>
-                  <svg className="absolute inset-0 w-full h-full pointer-events-none">
-                    <defs>
-                      <linearGradient id="neonGradientQuiz" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#22d3ee" />
-                        <stop offset="100%" stopColor="#e879f9" />
-                      </linearGradient>
-                      <filter id="neonGlowThickQuiz">
-                        <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
-                        <feMerge>
-                          <feMergeNode in="coloredBlur"/>
-                          <feMergeNode in="SourceGraphic"/>
-                        </feMerge>
-                      </filter>
-                    </defs>
-                    {quizMuscle.visualisatie.filter(p => p.image.includes("voor") && p.type === 'origo').map((origo, oIdx) => (
-                      quizMuscle.visualisatie.filter(p => p.image.includes("voor") && p.type === 'insertie').map((insertie, iIdx) => (
-                        <line 
-                          key={`line-${oIdx}-${iIdx}`}
-                          x1={origo.x} 
-                          y1={origo.y} 
-                          x2={insertie.x} 
-                          y2={insertie.y} 
-                          stroke="url(#neonGradientQuiz)" 
-                          strokeWidth="6"
-                          strokeLinecap="round"
-                          filter="url(#neonGlowThickQuiz)"
-                          className="opacity-90"
-                        />
-                      ))
-                    ))}
-                  </svg>
-                  {/* Dots */}
-                  {quizMuscle.visualisatie.filter(p => p.image.includes("voor")).map((point, idx) => (
-                    <div 
-                      key={`dot-${idx}`}
-                      className={`absolute w-4 h-4 rounded-full border-2 border-slate-900 -translate-x-1/2 -translate-y-1/2 z-10 ${point.type === 'origo' ? 'bg-fuchsia-400 shadow-[0_0_15px_rgba(232,121,249,0.8)]' : 'bg-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.8)]'}`}
-                      style={{ left: point.x, top: point.y }}
-                    >
-                      <div className={`absolute ${point.type === 'origo' ? '-top-6' : '-bottom-6'} left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-wider bg-slate-900/80 px-2 py-0.5 rounded-full border ${point.type === 'origo' ? 'text-fuchsia-300 border-fuchsia-500/30' : 'text-cyan-300 border-cyan-500/30'}`}>
-                        {point.type === 'origo' ? t[language].origo : t[language].insertion}
-                      </div>
-                    </div>
-                  ))}
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Controls */}
-            <div className="flex flex-col gap-4 shrink-0 pb-6">
-              <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                {quizOptions.map((option) => {
-                  let btnClass = "bg-white/5 text-slate-300 border-white/10 hover:bg-white/10";
-                  
-                  if (quizAnswered) {
-                    if (option === quizMuscle.naam) {
-                      btnClass = "bg-emerald-500/20 text-emerald-300 border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.2)]";
+            <MusclePlayfield 
+              muscle={quizMuscle} 
+              language={language} 
+              showSuccess={showSuccessAnimation} 
+              overlayTitle={`${t[language].question} ${quizStreak + 1}`}
+            >
+              {/* Controls */}
+              <div className="flex flex-col gap-4 shrink-0 pb-2">
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                  {quizOptions.map((option) => {
+                    let btnClass = "bg-white/5 text-slate-300 border-white/10 hover:bg-white/10";
+                    
+                    if (quizAnswered) {
+                      if (option === quizMuscle.naam) {
+                        btnClass = "bg-emerald-500/20 text-emerald-300 border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.2)]";
+                      } else if (option === quizSelectedOption) {
+                        btnClass = "bg-rose-500/20 text-rose-300 border-rose-500/50";
+                      }
                     } else if (option === quizSelectedOption) {
-                      btnClass = "bg-rose-500/20 text-rose-300 border-rose-500/50";
-                    } else {
-                      btnClass = "bg-white/5 text-slate-500 border-white/5 opacity-50";
+                      btnClass = "bg-cyan-500/20 text-cyan-300 border-cyan-500/50";
                     }
-                  }
 
-                  return (
+                    return (
+                      <button
+                        key={`quiz-${option}`}
+                        onClick={() => handleQuizOptionClick(option)}
+                        disabled={quizAnswered}
+                        className={`p-4 rounded-xl border font-bold text-sm transition-all active:scale-95 ${btnClass}`}
+                      >
+                        {option}
+                      </button>
+                    )
+                  })}
+                </div>
+
+                {/* Action Bar */}
+                <div className="flex justify-between items-center mt-2 h-12">
+                  <button 
+                    onClick={handleQuizInfoClick}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-slate-200 hover:bg-white/10 transition-colors"
+                  >
+                    <Info className="w-5 h-5" />
+                    <span className="font-medium text-sm">{t[language].info}</span>
+                  </button>
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500/10 text-orange-400 rounded-full border border-orange-500/20 shadow-[0_0_10px_rgba(249,115,22,0.1)]">
+                      <Flame className="w-4 h-4" />
+                      <span className="font-bold text-sm">{quizStreak}</span>
+                    </div>
                     <button
-                      key={option}
-                      onClick={() => handleQuizOptionClick(option)}
-                      disabled={quizAnswered}
-                      className={`p-3 rounded-xl border font-medium text-sm transition-all active:scale-95 ${btnClass}`}
+                      onClick={handleShareQuiz}
+                      disabled={isSharing}
+                      className="flex items-center justify-center p-2 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500/20 transition-colors disabled:opacity-50"
                     >
-                      {option}
+                      {isSharing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Share2 className="w-4 h-4" />}
                     </button>
-                  )
-                })}
+                  </div>
+                </div>
               </div>
-              {quizAnswered && quizSelectedOption !== quizMuscle.naam && (
-                <button
-                  onClick={() => startNewQuizRound()}
-                  className="w-full px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-bold hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all flex items-center justify-center gap-2 mt-2"
-                >
-                  {t[language].nextQuestion} <ChevronRight className="w-5 h-5" />
-                </button>
-              )}
-            </div>
+            </MusclePlayfield>
           </motion.div>
         )}
 
