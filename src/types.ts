@@ -6,16 +6,17 @@ export interface LocalizedMuscleData {
   functie: string;
 }
 
+export interface VisualisatiePoint {
+  image: string;
+  type: 'origo' | 'insertie';
+  x: string;
+  y: string;
+}
+
 export interface Muscle {
   id: string;
   naam: string;
   nl: LocalizedMuscleData;
   en: LocalizedMuscleData;
-  visualisatie: {
-    basis_weergave: string;
-    origo_x: string;
-    origo_y: string;
-    insertie_x: string;
-    insertie_y: string;
-  };
+  visualisatie: VisualisatiePoint[];
 }

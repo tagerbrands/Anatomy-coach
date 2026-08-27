@@ -1,782 +1,182 @@
 const fs = require('fs');
 
-const data = [
-{
-"id": "m_gluteus_maximus",
-"naam": "M. gluteus maximus",
-"visualisatie": {
-"basis_weergave": "skelet_achter.png",
-"origo_x": "50%",
-"origo_y": "30%",
-"insertie_x": "50%",
-"insertie_y": "60%"
-},
-"nl": {
-"regio": "GLUTEAAL (Bilregio)",
-"origo": "Achterzijde os ilium; facies dorsalis sacri en os coccygis; lig. sacrotuberale",
-"insertie": "Tuberositas glutea en tractus iliotibialis",
-"innervatie": "N. gluteus inferior",
-"functie": "Extensie en exorotatie heup; stabilisatie bekken"
-},
-"en": {
-"regio": "GLUTEAL (Gluteal region)",
-"origo": "Posterior surface of ilium; dorsal surfaces of sacrum and coccyx; sacrotuberous ligament",
-"insertie": "Gluteal tuberosity and iliotibial tract",
-"innervatie": "Inferior gluteal nerve",
-"functie": "Hip extension and external rotation; pelvic stabilization"
-}
-},
-{
-"id": "m_gluteus_medius",
-"naam": "M. gluteus medius",
-"visualisatie": {
-"basis_weergave": "skelet_achter.png",
-"origo_x": "50%",
-"origo_y": "30%",
-"insertie_x": "50%",
-"insertie_y": "60%"
-},
-"nl": {
-"regio": "GLUTEAAL (Bilregio)",
-"origo": "Facies glutea van os ilium tussen linea glutea anterior en posterior",
-"insertie": "Laterale zijde trochanter major (femur)",
-"innervatie": "N. gluteus superior",
-"functie": "Abductie heup; voorste vezels endorotatie; stabilisatie bekken"
-},
-"en": {
-"regio": "GLUTEAL (Gluteal region)",
-"origo": "Gluteal surface of ilium between anterior and posterior gluteal lines",
-"insertie": "Lateral surface of greater trochanter (femur)",
-"innervatie": "Superior gluteal nerve",
-"functie": "Hip abduction; anterior fibers medially rotate the hip; pelvic stabilization"
-}
-},
-{
-"id": "m_gluteus_minimus",
-"naam": "M. gluteus minimus",
-"visualisatie": {
-"basis_weergave": "skelet_achter.png",
-"origo_x": "50%",
-"origo_y": "30%",
-"insertie_x": "50%",
-"insertie_y": "60%"
-},
-"nl": {
-"regio": "GLUTEAAL (Bilregio)",
-"origo": "Facies glutea van os ilium tussen linea glutea anterior en inferior",
-"insertie": "Anterieure zijde trochanter major (femur)",
-"innervatie": "N. gluteus superior",
-"functie": "Abductie en endorotatie heup; stabilisatie bekken"
-},
-"en": {
-"regio": "GLUTEAL (Gluteal region)",
-"origo": "Gluteal surface of ilium between anterior and inferior gluteal lines",
-"insertie": "Anterior surface of greater trochanter (femur)",
-"innervatie": "Superior gluteal nerve",
-"functie": "Hip abduction and internal rotation; pelvic stabilization"
-}
-},
-{
-"id": "m_piriformis",
-"naam": "M. piriformis",
-"visualisatie": {
-"basis_weergave": "skelet_achter.png",
-"origo_x": "50%",
-"origo_y": "30%",
-"insertie_x": "50%",
-"insertie_y": "60%"
-},
-"nl": {
-"regio": "GLUTEAAL (Bilregio)",
-"origo": "Facies pelvica sacri",
-"insertie": "Bovenzijde trochanter major (femur)",
-"innervatie": "Plexus sacralis",
-"functie": "Exorotatie, abductie en extensie heup; stabilisatie bekken"
-},
-"en": {
-"regio": "GLUTEAL (Gluteal region)",
-"origo": "Pelvic surface of sacrum",
-"insertie": "Superior aspect of greater trochanter (femur)",
-"innervatie": "Sacral plexus",
-"functie": "Hip external rotation, abduction and extension; pelvic stabilization"
-}
-},
-{
-"id": "m_obturatorius_internus",
-"naam": "M. obturatorius internus",
-"visualisatie": {
-"basis_weergave": "skelet_achter.png",
-"origo_x": "50%",
-"origo_y": "30%",
-"insertie_x": "50%",
-"insertie_y": "60%"
-},
-"nl": {
-"regio": "GLUTEAAL (Bilregio)",
-"origo": "Binnenzijde membraan obturatoria en omringende bot",
-"insertie": "Fossa trochanterica (femur)",
-"innervatie": "N. obturatorius internus",
-"functie": "Exorotatie, abductie en extensie heup; stabilisatie bekken"
-},
-"en": {
-"regio": "GLUTEAL (Gluteal region)",
-"origo": "Internal surface of obturator membrane and surrounding bone",
-"insertie": "Trochanteric fossa (femur)",
-"innervatie": "Nerve to obturator internus",
-"functie": "Hip external rotation, abduction and extension; pelvic stabilization"
-}
-},
-{
-"id": "mm_gemelli",
-"naam": "Mm. gemelli",
-"visualisatie": {
-"basis_weergave": "skelet_achter.png",
-"origo_x": "50%",
-"origo_y": "30%",
-"insertie_x": "50%",
-"insertie_y": "60%"
-},
-"nl": {
-"regio": "GLUTEAAL (Bilregio)",
-"origo": "G. superior: spina ischiadica; G. inferior: tuber ischiadicum",
-"insertie": "Samen met pees m. obturatorius internus naar fossa trochanterica",
-"innervatie": "N. obturatorius internus en N. quadratus femoris",
-"functie": "Exorotatie, abductie en extensie heup; stabilisatie bekken"
-},
-"en": {
-"regio": "GLUTEAL (Gluteal region)",
-"origo": "Superior gemellus: ischial spine; inferior gemellus: ischial tuberosity",
-"insertie": "Together with the tendon of obturator internus to the trochanteric fossa",
-"innervatie": "Nerve to obturator internus and nerve to quadratus femoris",
-"functie": "Hip external rotation, abduction and extension; pelvic stabilization"
-}
-},
-{
-"id": "m_quadratus_femoris",
-"naam": "M. quadratus femoris",
-"visualisatie": {
-"basis_weergave": "skelet_achter.png",
-"origo_x": "50%",
-"origo_y": "30%",
-"insertie_x": "50%",
-"insertie_y": "60%"
-},
-"nl": {
-"regio": "GLUTEAAL (Bilregio)",
-"origo": "Laterale zijde tuber ischiadicum",
-"insertie": "Crista intertrochanterica (femur)",
-"innervatie": "N. quadratus femoris",
-"functie": "Exorotatie en adductie heup; stabilisatie bekken"
-},
-"en": {
-"regio": "GLUTEAL (Gluteal region)",
-"origo": "Lateral aspect of ischial tuberosity",
-"insertie": "Intertrochanteric crest (femur)",
-"innervatie": "Nerve to quadratus femoris",
-"functie": "Hip external rotation and adduction; pelvic stabilization"
-}
-},
-{
-"id": "m_sartorius",
-"naam": "M. sartorius",
-"visualisatie": {
-"basis_weergave": "skelet_voor.png",
-"origo_x": "50%",
-"origo_y": "30%",
-"insertie_x": "50%",
-"insertie_y": "60%"
-},
-"nl": {
-"regio": "BOVENBEEN (Anterieur)",
-"origo": "Spina iliaca anterior superior",
-"insertie": "Facies medialis tibiae (pes anserinus)",
-"innervatie": "N. femoralis",
-"functie": "Flexie, abductie, exorotatie heup; flexie en endorotatie knie"
-},
-"en": {
-"regio": "THIGH (Anterior)",
-"origo": "Anterior superior iliac spine",
-"insertie": "Medial surface of tibia (pes anserinus)",
-"innervatie": "Femoral nerve",
-"functie": "Hip flexion, abduction and external rotation; knee flexion and internal rotation"
-}
-},
-{
-"id": "m_quadriceps_femoris",
-"naam": "M. quadriceps femoris",
-"visualisatie": {
-"basis_weergave": "skelet_voor.png",
-"origo_x": "50%",
-"origo_y": "30%",
-"insertie_x": "50%",
-"insertie_y": "60%"
-},
-"nl": {
-"regio": "BOVENBEEN (Anterieur)",
-"origo": "R. femoris: SIAI; V. med/lat/inter: corpus femoris",
-"insertie": "Via patella en lig. patellae naar tuberositas tibiae",
-"innervatie": "N. femoralis",
-"functie": "Extensie knie; m. rectus femoris tevens flexie heup"
-},
-"en": {
-"regio": "THIGH (Anterior)",
-"origo": "Rectus femoris: anterior inferior iliac spine; vastus medialis/lateralis/intermedius: femoral shaft",
-"insertie": "Via patella and patellar ligament to tibial tuberosity",
-"innervatie": "Femoral nerve",
-"functie": "Knee extension; rectus femoris also flexes the hip"
-}
-},
-{
-"id": "m_pectineus",
-"naam": "M. pectineus",
-"visualisatie": {
-"basis_weergave": "skelet_voor.png",
-"origo_x": "50%",
-"origo_y": "30%",
-"insertie_x": "50%",
-"insertie_y": "60%"
-},
-"nl": {
-"regio": "BOVENBEEN (Mediaal)",
-"origo": "Pecten ossis pubis",
-"insertie": "Linea pectinea (femur)",
-"innervatie": "N. femoralis (en N. obturatorius)",
-"functie": "Adductie en flexie heup; stabilisatie bekken"
-},
-"en": {
-"regio": "THIGH (Medial)",
-"origo": "Pecten pubis",
-"insertie": "Pectineal line (femur)",
-"innervatie": "Femoral nerve (and obturator nerve)",
-"functie": "Hip adduction and flexion; pelvic stabilization"
-}
-},
-{
-"id": "m_gracilis",
-"naam": "M. gracilis",
-"visualisatie": {
-"basis_weergave": "skelet_voor.png",
-"origo_x": "50%",
-"origo_y": "30%",
-"insertie_x": "50%",
-"insertie_y": "60%"
-},
-"nl": {
-"regio": "BOVENBEEN (Mediaal)",
-"origo": "Ramus inferior ossis pubis",
-"insertie": "Facies medialis tibiae (pes anserinus)",
-"innervatie": "N. obturatorius",
-"functie": "Adductie en flexie heup; flexie en endorotatie knie"
-},
-"en": {
-"regio": "THIGH (Medial)",
-"origo": "Inferior ramus of pubis",
-"insertie": "Medial surface of tibia (pes anserinus)",
-"innervatie": "Obturator nerve",
-"functie": "Hip adduction and flexion; knee flexion and internal rotation"
-}
-},
-{
-"id": "m_adductor_longus",
-"naam": "M. adductor longus",
-"visualisatie": {
-"basis_weergave": "skelet_voor.png",
-"origo_x": "50%",
-"origo_y": "30%",
-"insertie_x": "50%",
-"insertie_y": "60%"
-},
-"nl": {
-"regio": "BOVENBEEN (Mediaal)",
-"origo": "Corpus ossis pubis",
-"insertie": "Linea aspera (femur)",
-"innervatie": "N. obturatorius",
-"functie": "Adductie en flexie heup; stabilisatie bekken"
-},
-"en": {
-"regio": "THIGH (Medial)",
-"origo": "Body of pubis",
-"insertie": "Linea aspera (femur)",
-"innervatie": "Obturator nerve",
-"functie": "Hip adduction and flexion; pelvic stabilization"
-}
-},
-{
-"id": "m_adductor_brevis",
-"naam": "M. adductor brevis",
-"visualisatie": {
-"basis_weergave": "skelet_voor.png",
-"origo_x": "50%",
-"origo_y": "30%",
-"insertie_x": "50%",
-"insertie_y": "60%"
-},
-"nl": {
-"regio": "BOVENBEEN (Mediaal)",
-"origo": "Ramus inferior ossis pubis",
-"insertie": "Linea aspera (femur)",
-"innervatie": "N. obturatorius",
-"functie": "Adductie en flexie heup; stabilisatie bekken"
-},
-"en": {
-"regio": "THIGH (Medial)",
-"origo": "Inferior ramus of pubis",
-"insertie": "Linea aspera (femur)",
-"innervatie": "Obturator nerve",
-"functie": "Hip adduction and flexion; pelvic stabilization"
-}
-},
-{
-"id": "m_adductor_magnus",
-"naam": "M. adductor magnus",
-"visualisatie": {
-"basis_weergave": "skelet_voor.png",
-"origo_x": "50%",
-"origo_y": "30%",
-"insertie_x": "50%",
-"insertie_y": "60%"
-},
-"nl": {
-"regio": "BOVENBEEN (Mediaal)",
-"origo": "Ramus inf. ossis pubis; ramus ossis ischii; tuber ischiadicum",
-"insertie": "Linea aspera en adductor tubercle (femur)",
-"innervatie": "N. obturatorius en N. ischiadicus (tibial part)",
-"functie": "Adductie, extensie (en flexie) heup; stabilisatie bekken"
-},
-"en": {
-"regio": "THIGH (Medial)",
-"origo": "Inferior ramus of pubis; ramus of ischium; ischial tuberosity",
-"insertie": "Linea aspera and adductor tubercle (femur)",
-"innervatie": "Obturator nerve and sciatic nerve (tibial division)",
-"functie": "Hip adduction and extension (and flexion); pelvic stabilization"
-}
-},
-{
-"id": "m_biceps_femoris",
-"naam": "M. biceps femoris",
-"visualisatie": {
-"basis_weergave": "skelet_achter.png",
-"origo_x": "50%",
-"origo_y": "30%",
-"insertie_x": "50%",
-"insertie_y": "60%"
-},
-"nl": {
-"regio": "BOVENBEEN (Posterieur)",
-"origo": "Caput longum: tuber ischiadicum; Caput breve: linea aspera",
-"insertie": "Caput fibulae",
-"innervatie": "N. ischiadicus",
-"functie": "Flexie en exorotatie knie; caput longum tevens extensie heup"
-},
-"en": {
-"regio": "THIGH (Posterior)",
-"origo": "Long head: ischial tuberosity; short head: linea aspera",
-"insertie": "Head of fibula",
-"innervatie": "Sciatic nerve",
-"functie": "Knee flexion and external rotation; long head also extends the hip"
-}
-},
-{
-"id": "m_semitendinosus",
-"naam": "M. semitendinosus",
-"visualisatie": {
-"basis_weergave": "skelet_achter.png",
-"origo_x": "50%",
-"origo_y": "30%",
-"insertie_x": "50%",
-"insertie_y": "60%"
-},
-"nl": {
-"regio": "BOVENBEEN (Posterieur)",
-"origo": "Tuber ischiadicum",
-"insertie": "Facies medialis tibiae (pes anserinus)",
-"innervatie": "N. ischiadicus",
-"functie": "Flexie en endorotatie knie; extensie heup"
-},
-"en": {
-"regio": "THIGH (Posterior)",
-"origo": "Ischial tuberosity",
-"insertie": "Medial surface of tibia (pes anserinus)",
-"innervatie": "Sciatic nerve",
-"functie": "Knee flexion and internal rotation; hip extension"
-}
-},
-{
-"id": "m_semimembranosus",
-"naam": "M. semimembranosus",
-"visualisatie": {
-"basis_weergave": "skelet_achter.png",
-"origo_x": "50%",
-"origo_y": "30%",
-"insertie_x": "50%",
-"insertie_y": "60%"
-},
-"nl": {
-"regio": "BOVENBEEN (Posterieur)",
-"origo": "Tuber ischiadicum",
-"insertie": "Condylus medialis tibiae",
-"innervatie": "N. ischiadicus",
-"functie": "Flexie en endorotatie knie; extensie heup"
-},
-"en": {
-"regio": "THIGH (Posterior)",
-"origo": "Ischial tuberosity",
-"insertie": "Medial condyle of tibia",
-"innervatie": "Sciatic nerve",
-"functie": "Knee flexion and internal rotation; hip extension"
-}
-},
-{
-"id": "m_tensor_fasciae_latae",
-"naam": "M. tensor fasciae latae",
-"visualisatie": {
-"basis_weergave": "skelet_voor.png",
-"origo_x": "50%",
-"origo_y": "30%",
-"insertie_x": "50%",
-"insertie_y": "60%"
-},
-"nl": {
-"regio": "BOVENBEEN (Lateraal)",
-"origo": "Spina iliaca anterior superior en crista iliaca",
-"insertie": "Tractus iliotibialis naar condylus lateralis tibiae",
-"innervatie": "N. gluteus superior",
-"functie": "Flexie, abductie, endorotatie heup; extensie en exorotatie knie"
-},
-"en": {
-"regio": "THIGH (Lateral)",
-"origo": "Anterior superior iliac spine and iliac crest",
-"insertie": "Iliotibial tract to lateral condyle of tibia",
-"innervatie": "Superior gluteal nerve",
-"functie": "Hip flexion, abduction and internal rotation; knee extension and external rotation"
-}
-},
-{
-"id": "m_tibialis_anterior",
-"naam": "M. tibialis anterior",
-"visualisatie": {
-"basis_weergave": "skelet_voor.png",
-"origo_x": "50%",
-"origo_y": "30%",
-"insertie_x": "50%",
-"insertie_y": "60%"
-},
-"nl": {
-"regio": "ONDERBEEN (Anterieur)",
-"origo": "Facies lateralis tibiae en membraan interossea",
-"insertie": "Os cuneiforme mediale en os metatarsale I",
-"innervatie": "N. fibularis profundus",
-"functie": "Dorsaalflexie en inversie voet"
-},
-"en": {
-"regio": "LEG (Anterior)",
-"origo": "Lateral surface of tibia and interosseous membrane",
-"insertie": "Medial cuneiform and first metatarsal",
-"innervatie": "Deep fibular nerve",
-"functie": "Ankle dorsiflexion and foot inversion"
-}
-},
-{
-"id": "m_extensor_hallucis_longus",
-"naam": "M. extensor hallucis longus",
-"visualisatie": {
-"basis_weergave": "skelet_voor.png",
-"origo_x": "50%",
-"origo_y": "30%",
-"insertie_x": "50%",
-"insertie_y": "60%"
-},
-"nl": {
-"regio": "ONDERBEEN (Anterieur)",
-"origo": "Facies medialis fibulae en membraan interossea",
-"insertie": "Phalanx distalis hallux (grote teen)",
-"innervatie": "N. fibularis profundus",
-"functie": "Extensie hallux; dorsaalflexie en inversie voet"
-},
-"en": {
-"regio": "LEG (Anterior)",
-"origo": "Medial surface of fibula and interosseous membrane",
-"insertie": "Distal phalanx of great toe",
-"innervatie": "Deep fibular nerve",
-"functie": "Great toe extension; ankle dorsiflexion and foot inversion"
-}
-},
-{
-"id": "m_extensor_digitorum_longus",
-"naam": "M. extensor digitorum longus",
-"visualisatie": {
-"basis_weergave": "skelet_voor.png",
-"origo_x": "50%",
-"origo_y": "30%",
-"insertie_x": "50%",
-"insertie_y": "60%"
-},
-"nl": {
-"regio": "ONDERBEEN (Anterieur)",
-"origo": "Condylus lateralis tibiae, fibula en membraan interossea",
-"insertie": "Dorsale aponeurose van tenen II-V",
-"innervatie": "N. fibularis profundus",
-"functie": "Extensie tenen II-V; dorsaalflexie en eversie voet"
-},
-"en": {
-"regio": "LEG (Anterior)",
-"origo": "Lateral condyle of tibia, fibula and interosseous membrane",
-"insertie": "Dorsal aponeuroses of toes II–V",
-"innervatie": "Deep fibular nerve",
-"functie": "Extension of toes II–V; ankle dorsiflexion and foot eversion"
-}
-},
-{
-"id": "m_fibularis_tertius",
-"naam": "M. fibularis tertius",
-"visualisatie": {
-"basis_weergave": "skelet_voor.png",
-"origo_x": "50%",
-"origo_y": "30%",
-"insertie_x": "50%",
-"insertie_y": "60%"
-},
-"nl": {
-"regio": "ONDERBEEN (Anterieur)",
-"origo": "Distale deel facies medialis fibulae",
-"insertie": "Os metatarsale V",
-"innervatie": "N. fibularis profundus",
-"functie": "Dorsaalflexie en eversie voet"
-},
-"en": {
-"regio": "LEG (Anterior)",
-"origo": "Distal part of medial surface of fibula",
-"insertie": "Fifth metatarsal",
-"innervatie": "Deep fibular nerve",
-"functie": "Ankle dorsiflexion and foot eversion"
-}
-},
-{
-"id": "m_fibularis_longus",
-"naam": "M. fibularis longus",
-"visualisatie": {
-"basis_weergave": "skelet_voor.png",
-"origo_x": "50%",
-"origo_y": "30%",
-"insertie_x": "50%",
-"insertie_y": "60%"
-},
-"nl": {
-"regio": "ONDERBEEN (Lateraal)",
-"origo": "Caput fibulae en facies lateralis fibulae",
-"insertie": "Os cuneiforme mediale en os metatarsale I (plantair)",
-"innervatie": "N. fibularis superficialis",
-"functie": "Plantairflexie en eversie voet; ondersteunt voetboog"
-},
-"en": {
-"regio": "LEG (Lateral)",
-"origo": "Head and lateral surface of fibula",
-"insertie": "Medial cuneiform and first metatarsal (plantar surface)",
-"innervatie": "Superficial fibular nerve",
-"functie": "Ankle plantarflexion and foot eversion; supports the foot arch"
-}
-},
-{
-"id": "m_fibularis_brevis",
-"naam": "M. fibularis brevis",
-"visualisatie": {
-"basis_weergave": "skelet_voor.png",
-"origo_x": "50%",
-"origo_y": "30%",
-"insertie_x": "50%",
-"insertie_y": "60%"
-},
-"nl": {
-"regio": "ONDERBEEN (Lateraal)",
-"origo": "Facies lateralis fibulae",
-"insertie": "Tuberositas ossis metatarsalis V",
-"innervatie": "N. fibularis superficialis",
-"functie": "Plantairflexie en eversie voet"
-},
-"en": {
-"regio": "LEG (Lateral)",
-"origo": "Lateral surface of fibula",
-"insertie": "Tuberosity of fifth metatarsal",
-"innervatie": "Superficial fibular nerve",
-"functie": "Ankle plantarflexion and foot eversion"
-}
-},
-{
-"id": "m_gastrocnemius",
-"naam": "M. gastrocnemius",
-"visualisatie": {
-"basis_weergave": "skelet_achter.png",
-"origo_x": "50%",
-"origo_y": "30%",
-"insertie_x": "50%",
-"insertie_y": "60%"
-},
-"nl": {
-"regio": "ONDERBEEN (Posterieur) - Oppervlakkig",
-"origo": "Caput mediale: epicondylus medialis; Caput laterale: epicondylus lateralis",
-"insertie": "Via achillespees naar tuber calcanei",
-"innervatie": "N. tibialis",
-"functie": "Plantairflexie voet; flexie knie"
-},
-"en": {
-"regio": "LEG (Posterior) – Superficial",
-"origo": "Medial head: medial epicondyle; lateral head: lateral epicondyle",
-"insertie": "Via Achilles tendon to calcaneal tuberosity",
-"innervatie": "Tibial nerve",
-"functie": "Ankle plantarflexion; knee flexion"
-}
-},
-{
-"id": "m_soleus",
-"naam": "M. soleus",
-"visualisatie": {
-"basis_weergave": "skelet_achter.png",
-"origo_x": "50%",
-"origo_y": "30%",
-"insertie_x": "50%",
-"insertie_y": "60%"
-},
-"nl": {
-"regio": "ONDERBEEN (Posterieur) - Oppervlakkig",
-"origo": "Linea m. solei tibiae en caput fibulae",
-"insertie": "Via achillespees naar tuber calcanei",
-"innervatie": "N. tibialis",
-"functie": "Plantairflexie voet"
-},
-"en": {
-"regio": "LEG (Posterior) – Superficial",
-"origo": "Soleal line of tibia and head of fibula",
-"insertie": "Via Achilles tendon to calcaneal tuberosity",
-"innervatie": "Tibial nerve",
-"functie": "Ankle plantarflexion"
-}
-},
-{
-"id": "m_plantaris",
-"naam": "M. plantaris",
-"visualisatie": {
-"basis_weergave": "skelet_achter.png",
-"origo_x": "50%",
-"origo_y": "30%",
-"insertie_x": "50%",
-"insertie_y": "60%"
-},
-"nl": {
-"regio": "ONDERBEEN (Posterieur) - Oppervlakkig",
-"origo": "Linea supracondylaris lateralis femoris",
-"insertie": "Samen met achillespees of mediaal daarvan naar tuber calcanei",
-"innervatie": "N. tibialis",
-"functie": "Plantairflexie voet; flexie knie (beperkt)"
-},
-"en": {
-"regio": "LEG (Posterior) – Superficial",
-"origo": "Lateral supracondylar line of femur",
-"insertie": "Together with the Achilles tendon or medial to it to the calcaneal tuberosity",
-"innervatie": "Tibial nerve",
-"functie": "Ankle plantarflexion; limited knee flexion"
-}
-},
-{
-"id": "m_popliteus",
-"naam": "M. popliteus",
-"visualisatie": {
-"basis_weergave": "skelet_achter.png",
-"origo_x": "50%",
-"origo_y": "30%",
-"insertie_x": "50%",
-"insertie_y": "60%"
-},
-"nl": {
-"regio": "ONDERBEEN (Posterieur) - Diep",
-"origo": "Condylus lateralis femoris",
-"insertie": "Facies posterior tibiae (boven linea m. solei)",
-"innervatie": "N. tibialis",
-"functie": "Flexie en endorotatie knie ('unlockt' de knie)"
-},
-"en": {
-"regio": "LEG (Posterior) – Deep",
-"origo": "Lateral condyle of femur",
-"insertie": "Posterior surface of tibia (above soleal line)",
-"innervatie": "Tibial nerve",
-"functie": "Knee flexion and internal rotation ('unlocks' the knee)"
-}
-},
-{
-"id": "m_tibialis_posterieur",
-"naam": "M. tibialis posterieur",
-"visualisatie": {
-"basis_weergave": "skelet_achter.png",
-"origo_x": "50%",
-"origo_y": "30%",
-"insertie_x": "50%",
-"insertie_y": "60%"
-},
-"nl": {
-"regio": "ONDERBEEN (Posterieur) - Diep",
-"origo": "Membraan interossea en aangrenzende tibia en fibula",
-"insertie": "Tuberositas ossis navicularis, cuneiformia en metatarsalia II-IV",
-"innervatie": "N. tibialis",
-"functie": "Plantairflexie en inversie voet; ondersteunt voetboog"
-},
-"en": {
-"regio": "LEG (Posterior) – Deep",
-"origo": "Interosseous membrane and adjacent tibia and fibula",
-"insertie": "Navicular tuberosity, cuneiforms and metatarsals II–IV",
-"innervatie": "Tibial nerve",
-"functie": "Ankle plantarflexion and foot inversion; supports the foot arch"
-}
-},
-{
-"id": "m_flexor_hallucis_longus",
-"naam": "M. flexor hallucis longus",
-"visualisatie": {
-"basis_weergave": "skelet_achter.png",
-"origo_x": "50%",
-"origo_y": "30%",
-"insertie_x": "50%",
-"insertie_y": "60%"
-},
-"nl": {
-"regio": "ONDERBEEN (Posterieur) - Diep",
-"origo": "Facies posterior fibulae en membraan interossea",
-"insertie": "Phalanx distalis hallux (plantair)",
-"innervatie": "N. tibialis",
-"functie": "Flexie hallux; plantairflexie en inversie voet"
-},
-"en": {
-"regio": "LEG (Posterior) – Deep",
-"origo": "Posterior surface of fibula and interosseous membrane",
-"insertie": "Distal phalanx of great toe (plantar surface)",
-"innervatie": "Tibial nerve",
-"functie": "Great toe flexion; ankle plantarflexion and foot inversion"
-}
-},
-{
-"id": "m_flexor_digitorum_longus",
-"naam": "M. flexor digitorum longus",
-"visualisatie": {
-"basis_weergave": "skelet_achter.png",
-"origo_x": "50%",
-"origo_y": "30%",
-"insertie_x": "50%",
-"insertie_y": "60%"
-},
-"nl": {
-"regio": "ONDERBEEN (Posterieur) - Diep",
-"origo": "Facies posterior tibiae (mediaal)",
-"insertie": "Phalanges distales tenen II-V (plantair)",
-"innervatie": "N. tibialis",
-"functie": "Flexie tenen II-V; plantairflexie en inversie voet"
-},
-"en": {
-"regio": "LEG (Posterior) – Deep",
-"origo": "Posterior surface of tibia (medial)",
-"insertie": "Distal phalanges of toes II–V (plantar surface)",
-"innervatie": "Tibial nerve",
-"functie": "Flexion of toes II–V; ankle plantarflexion and foot inversion"
-}
-}
+const userJson = [
+  { "spier": "m_iliopsoas", "data": [ { "image": "regio_boven_voor.png", "type": "origo", "x": "30.0%", "y": "6.0%" }, { "image": "regio_boven_voor.png", "type": "insertie", "x": "36.6%", "y": "36.5%" } ] },
+  { "spier": "m_rectus_femoris", "data": [ { "image": "regio_boven_voor.png", "type": "origo", "x": "32.0%", "y": "20.4%" }, { "image": "regio_boven_voor.png", "type": "insertie", "x": "52.3%", "y": "90.6%" } ] },
+  { "spier": "m_tensor_fasciae_latae", "data": [ { "image": "regio_boven_voor.png", "type": "origo", "x": "14.3%", "y": "11.1%" }, { "image": "regio_boven_voor.png", "type": "insertie", "x": "33.3%", "y": "94.6%" } ] },
+  { "spier": "m_sartorius", "data": [ { "image": "regio_boven_voor.png", "type": "origo", "x": "14.3%", "y": "11.5%" }, { "image": "regio_boven_voor.png", "type": "insertie", "x": "65.4%", "y": "95.0%" } ] },
+  { "spier": "m_pectineus", "data": [ { "image": "regio_boven_voor.png", "type": "origo", "x": "85.7%", "y": "27.0%" }, { "image": "regio_boven_achter.png", "type": "insertie", "x": "69.7%", "y": "45.6%" } ] },
+  { "spier": "m_adductor_longus", "data": [ { "image": "regio_boven_voor.png", "type": "origo", "x": "90.9%", "y": "31.2%" }, { "image": "regio_boven_achter.png", "type": "insertie", "x": "72.2%", "y": "51.6%" } ] },
+  { "spier": "m_adductor_brevis", "data": [ { "image": "regio_boven_voor.png", "type": "origo", "x": "86.3%", "y": "33.0%" }, { "image": "regio_boven_achter.png", "type": "insertie", "x": "70.3%", "y": "50.0%" } ] },
+  { "spier": "m_adductor_magnus", "data": [ { "image": "regio_boven_voor.png", "type": "origo", "x": "73.2%", "y": "35.4%" }, { "image": "regio_boven_achter.png", "type": "insertie", "x": "72.2%", "y": "46.9%" } ] },
+  { "spier": "m_gracilis", "data": [ { "image": "regio_boven_voor.png", "type": "origo", "x": "78.5%", "y": "35.4%" }, { "image": "regio_boven_voor.png", "type": "insertie", "x": "68.0%", "y": "95.4%" } ] },
+  { "spier": "m_gluteus_maximus", "data": [ { "image": "regio_boven_achter.png", "type": "origo", "x": "18.4%", "y": "19.5%" }, { "image": "regio_boven_achter.png", "type": "insertie", "x": "81.6%", "y": "34.8%" } ] },
+  { "spier": "m_gluteus_medius", "data": [ { "image": "regio_boven_achter.png", "type": "origo", "x": "54.7%", "y": "5.3%" }, { "image": "regio_boven_achter.png", "type": "insertie", "x": "92.2%", "y": "29.0%" } ] },
+  { "spier": "m_gluteus_minimus", "data": [ { "image": "regio_boven_achter.png", "type": "origo", "x": "69.1%", "y": "11.5%" }, { "image": "regio_boven_achter.png", "type": "insertie", "x": "98.5%", "y": "30.1%" } ] },
+  { "spier": "m_piriformis", "data": [ { "image": "regio_boven_achter.png", "type": "origo", "x": "42.2%", "y": "17.1%" }, { "image": "regio_boven_achter.png", "type": "insertie", "x": "88.5%", "y": "26.8%" } ] },
+  { "spier": "m_biceps_femoris", "data": [ { "image": "regio_boven_voor.png", "type": "origo", "x": "62.8%", "y": "35.7%" }, { "image": "regio_boven_voor.png", "type": "insertie", "x": "28.1%", "y": "97.7%" } ] },
+  { "spier": "m_semitendinosus", "data": [ { "image": "regio_boven_voor.png", "type": "origo", "x": "62.8%", "y": "35.9%" }, { "image": "regio_boven_voor.png", "type": "insertie", "x": "68.0%", "y": "96.5%" } ] },
+  { "spier": "m_semimembranosus", "data": [ { "image": "regio_boven_voor.png", "type": "origo", "x": "56.2%", "y": "34.6%" }, { "image": "regio_boven_achter.png", "type": "origo", "x": "41.6%", "y": "36.5%" }, { "image": "regio_boven_achter.png", "type": "insertie", "x": "37.8%", "y": "87.5%" } ] },
+  { "spier": "m_quadriceps_femoris", "data": [ { "image": "regio_boven_voor.png", "type": "origo", "x": "33.3%", "y": "20.8%" }, { "image": "regio_boven_voor.png", "type": "insertie", "x": "51.6%", "y": "90.3%" } ] },
+  { "spier": "m_vastus_lateralis", "data": [ { "image": "regio_boven_voor.png", "type": "origo", "x": "11.1%", "y": "31.7%" }, { "image": "regio_boven_voor.png", "type": "insertie", "x": "52.3%", "y": "90.1%" } ] },
+  { "spier": "m_vastus_medialis", "data": [ { "image": "regio_boven_voor.png", "type": "insertie", "x": "51.6%", "y": "90.1%" }, { "image": "regio_boven_voor.png", "type": "origo", "x": "32.7%", "y": "39.8%" }, { "image": "regio_boven_achter.png", "type": "origo", "x": "63.4%", "y": "53.2%" } ] },
+  { "spier": "m_vastus_intermedius", "data": [ { "image": "regio_boven_voor.png", "type": "origo", "x": "20.9%", "y": "43.0%" }, { "image": "regio_boven_voor.png", "type": "insertie", "x": "52.3%", "y": "89.9%" } ] },
+  { "spier": "m_gastrocnemius", "data": [ { "image": "regio_onder_achter.png", "type": "origo", "x": "38.5%", "y": "18.2%" }, { "image": "regio_onder_achter.png", "type": "insertie", "x": "43.1%", "y": "92.6%" } ] },
+  { "spier": "m_soleus", "data": [ { "image": "regio_onder_achter.png", "type": "origo", "x": "62.4%", "y": "35.2%" }, { "image": "regio_onder_achter.png", "type": "insertie", "x": "42.2%", "y": "92.5%" } ] },
+  { "spier": "m_tibialis_anterior", "data": [ { "image": "regio_onder_voor.png", "type": "origo", "x": "56.0%", "y": "46.0%" }, { "image": "regio_onder_voor.png", "type": "insertie", "x": "83.4%", "y": "88.3%" } ] },
+  { "spier": "m_peroneus_longus", "data": [ { "image": "regio_onder_voor.png", "type": "origo", "x": "33.1%", "y": "42.7%" }, { "image": "regio_onder_voor.png", "type": "insertie", "x": "87.1%", "y": "89.7%" } ] },
+  { "spier": "m_extensor_digitorum_longus", "data": [ { "image": "regio_onder_voor.png", "type": "origo", "x": "39.5%", "y": "43.0%" }, { "image": "regio_onder_voor.png", "type": "insertie", "x": "48.6%", "y": "91.7%" } ] },
+  { "spier": "m_flexor_digitorum_longus", "data": [ { "image": "regio_onder_achter.png", "type": "origo", "x": "36.6%", "y": "52.9%" }, { "image": "regio_onder_achter.png", "type": "insertie", "x": "63.4%", "y": "97.2%" } ] },
+  { "spier": "m_tibialis_posterior", "data": [ { "image": "regio_onder_achter.png", "type": "origo", "x": "53.2%", "y": "47.2%" }, { "image": "regio_onder_achter.png", "type": "insertie", "x": "15.4%", "y": "92.1%" } ] }
 ];
 
-const newContent = `import { Muscle } from './types';\n\nexport const MUSCLES: Muscle[] = ${JSON.stringify(data, null, 2)};\n`;
-fs.writeFileSync('src/data.ts', newContent);
+const muscleDataMap = {
+  "m_iliopsoas": {
+    naam: "M. iliopsoas",
+    nl: { regio: "BOVENBEEN (Anterieur)", origo: "Fossa iliaca (iliacus) en wervellichamen T12-L5 (psoas)", insertie: "Trochanter minor femoris", innervatie: "N. femoralis en rami anteriores L1-L3", functie: "Anteflexie en exorotatie heup" },
+    en: { regio: "THIGH (Anterior)", origo: "Iliac fossa (iliacus) and vertebral bodies T12-L5 (psoas)", insertie: "Lesser trochanter of femur", innervatie: "Femoral nerve and anterior rami L1-L3", functie: "Hip anteflexion and external rotation" }
+  },
+  "m_rectus_femoris": {
+    naam: "M. rectus femoris",
+    nl: { regio: "BOVENBEEN (Anterieur)", origo: "Spina iliaca anterior inferior (SIAI)", insertie: "Tuberositas tibiae (via lig. patellae)", innervatie: "N. femoralis", functie: "Anteflexie heup, Extensie knie" },
+    en: { regio: "THIGH (Anterior)", origo: "Anterior inferior iliac spine (AIIS)", insertie: "Tibial tuberosity (via patellar ligament)", innervatie: "Femoral nerve", functie: "Hip anteflexion, Knee extension" }
+  },
+  "m_tensor_fasciae_latae": {
+    naam: "M. tensor fasciae latae",
+    nl: { regio: "BOVENBEEN (Lateraal)", origo: "Spina iliaca anterior superior (SIAS)", insertie: "Tractus iliotibialis", innervatie: "N. gluteus superior", functie: "Anteflexie heup, Abductie heup, Endorotatie heup" },
+    en: { regio: "THIGH (Lateral)", origo: "Anterior superior iliac spine (ASIS)", insertie: "Iliotibial tract", innervatie: "Superior gluteal nerve", functie: "Hip anteflexion, Hip abduction, Hip internal rotation" }
+  },
+  "m_sartorius": {
+    naam: "M. sartorius",
+    nl: { regio: "BOVENBEEN (Anterieur)", origo: "Spina iliaca anterior superior (SIAS)", insertie: "Facies medialis tibiae (pes anserinus)", innervatie: "N. femoralis", functie: "Anteflexie heup, Abductie heup, Exorotatie heup, Flexie knie, Endorotatie knie" },
+    en: { regio: "THIGH (Anterior)", origo: "Anterior superior iliac spine (ASIS)", insertie: "Medial surface of tibia (pes anserinus)", innervatie: "Femoral nerve", functie: "Hip anteflexion, Hip abduction, Hip external rotation, Knee flexion, Knee internal rotation" }
+  },
+  "m_pectineus": {
+    naam: "M. pectineus",
+    nl: { regio: "BOVENBEEN (Mediaal)", origo: "Pecten ossis pubis", insertie: "Linea pectinea femoris", innervatie: "N. femoralis, N. obturatorius", functie: "Anteflexie heup, Adductie heup" },
+    en: { regio: "THIGH (Medial)", origo: "Pectineal line of pubis", insertie: "Pectineal line of femur", innervatie: "Femoral nerve, Obturator nerve", functie: "Hip anteflexion, Hip adduction" }
+  },
+  "m_adductor_longus": {
+    naam: "M. adductor longus",
+    nl: { regio: "BOVENBEEN (Mediaal)", origo: "Corpus ossis pubis", insertie: "Linea aspera (labium mediale)", innervatie: "N. obturatorius", functie: "Adductie heup, Anteflexie heup" },
+    en: { regio: "THIGH (Medial)", origo: "Body of pubis", insertie: "Linea aspera (medial lip)", innervatie: "Obturator nerve", functie: "Hip adduction, Hip anteflexion" }
+  },
+  "m_adductor_brevis": {
+    naam: "M. adductor brevis",
+    nl: { regio: "BOVENBEEN (Mediaal)", origo: "Ramus inferior ossis pubis", insertie: "Linea aspera (labium mediale)", innervatie: "N. obturatorius", functie: "Adductie heup, Anteflexie heup" },
+    en: { regio: "THIGH (Medial)", origo: "Inferior ramus of pubis", insertie: "Linea aspera (medial lip)", innervatie: "Obturator nerve", functie: "Hip adduction, Hip anteflexion" }
+  },
+  "m_adductor_magnus": {
+    naam: "M. adductor magnus",
+    nl: { regio: "BOVENBEEN (Mediaal)", origo: "Ramus inferior pubis, ramus ischiadicus, tuber ischiadicum", insertie: "Linea aspera, tuberculum adductorium", innervatie: "N. obturatorius, N. ischiadicus", functie: "Adductie heup, Dorsoflexie heup (ischiadische deel)" },
+    en: { regio: "THIGH (Medial)", origo: "Inferior ramus of pubis, ischial ramus, ischial tuberosity", insertie: "Linea aspera, adductor tubercle", innervatie: "Obturator nerve, Sciatic nerve", functie: "Hip adduction, Hip dorsoflexion (ischial part)" }
+  },
+  "m_gracilis": {
+    naam: "M. gracilis",
+    nl: { regio: "BOVENBEEN (Mediaal)", origo: "Ramus inferior ossis pubis", insertie: "Facies medialis tibiae (pes anserinus)", innervatie: "N. obturatorius", functie: "Adductie heup, Flexie knie, Endorotatie knie" },
+    en: { regio: "THIGH (Medial)", origo: "Inferior ramus of pubis", insertie: "Medial surface of tibia (pes anserinus)", innervatie: "Obturator nerve", functie: "Hip adduction, Knee flexion, Knee internal rotation" }
+  },
+  "m_gluteus_maximus": {
+    naam: "M. gluteus maximus",
+    nl: { regio: "GLUTEAAL (Bilregio)", origo: "Os ilium, sacrum, coccyx, lig. sacrotuberale", insertie: "Tractus iliotibialis, tuberositas glutea", innervatie: "N. gluteus inferior", functie: "Dorsoflexie heup, Exorotatie heup" },
+    en: { regio: "GLUTEAL (Gluteal region)", origo: "Ilium, sacrum, coccyx, sacrotuberous ligament", insertie: "Iliotibial tract, gluteal tuberosity", innervatie: "Inferior gluteal nerve", functie: "Hip dorsoflexion, Hip external rotation" }
+  },
+  "m_gluteus_medius": {
+    naam: "M. gluteus medius",
+    nl: { regio: "GLUTEAAL (Bilregio)", origo: "Facies glutea ossis ilii", insertie: "Trochanter major", innervatie: "N. gluteus superior", functie: "Abductie heup, Endorotatie heup (ventrale vezels), Exorotatie heup (dorsale vezels)" },
+    en: { regio: "GLUTEAL (Gluteal region)", origo: "Gluteal surface of ilium", insertie: "Greater trochanter", innervatie: "Superior gluteal nerve", functie: "Hip abduction, Hip internal rotation (anterior fibers), Hip external rotation (posterior fibers)" }
+  },
+  "m_gluteus_minimus": {
+    naam: "M. gluteus minimus",
+    nl: { regio: "GLUTEAAL (Bilregio)", origo: "Facies glutea ossis ilii", insertie: "Trochanter major", innervatie: "N. gluteus superior", functie: "Abductie heup, Endorotatie heup" },
+    en: { regio: "GLUTEAL (Gluteal region)", origo: "Gluteal surface of ilium", insertie: "Greater trochanter", innervatie: "Superior gluteal nerve", functie: "Hip abduction, Hip internal rotation" }
+  },
+  "m_piriformis": {
+    naam: "M. piriformis",
+    nl: { regio: "GLUTEAAL (Bilregio)", origo: "Facies pelvica ossis sacri", insertie: "Trochanter major", innervatie: "Rami anteriores S1-S2", functie: "Exorotatie heup, Abductie heup" },
+    en: { regio: "GLUTEAL (Gluteal region)", origo: "Pelvic surface of sacrum", insertie: "Greater trochanter", innervatie: "Anterior rami S1-S2", functie: "Hip external rotation, Hip abduction" }
+  },
+  "m_biceps_femoris": {
+    naam: "M. biceps femoris",
+    nl: { regio: "BOVENBEEN (Posterieur)", origo: "Tuber ischiadicum (caput longum), Linea aspera (caput breve)", insertie: "Caput fibulae", innervatie: "N. ischiadicus", functie: "Flexie knie, Exorotatie knie, Dorsoflexie heup" },
+    en: { regio: "THIGH (Posterior)", origo: "Ischial tuberosity (long head), Linea aspera (short head)", insertie: "Head of fibula", innervatie: "Sciatic nerve", functie: "Knee flexion, Knee external rotation, Hip dorsoflexion" }
+  },
+  "m_semitendinosus": {
+    naam: "M. semitendinosus",
+    nl: { regio: "BOVENBEEN (Posterieur)", origo: "Tuber ischiadicum", insertie: "Facies medialis tibiae (pes anserinus)", innervatie: "N. ischiadicus", functie: "Flexie knie, Endorotatie knie, Dorsoflexie heup" },
+    en: { regio: "THIGH (Posterior)", origo: "Ischial tuberosity", insertie: "Medial surface of tibia (pes anserinus)", innervatie: "Sciatic nerve", functie: "Knee flexion, Knee internal rotation, Hip dorsoflexion" }
+  },
+  "m_semimembranosus": {
+    naam: "M. semimembranosus",
+    nl: { regio: "BOVENBEEN (Posterieur)", origo: "Tuber ischiadicum", insertie: "Condylus medialis tibiae", innervatie: "N. ischiadicus", functie: "Flexie knie, Endorotatie knie, Dorsoflexie heup" },
+    en: { regio: "THIGH (Posterior)", origo: "Ischial tuberosity", insertie: "Medial condyle of tibia", innervatie: "Sciatic nerve", functie: "Knee flexion, Knee internal rotation, Hip dorsoflexion" }
+  },
+  "m_quadriceps_femoris": {
+    naam: "M. quadriceps femoris",
+    nl: { regio: "BOVENBEEN (Anterieur)", origo: "Bekken en femur (4 koppen)", insertie: "Tuberositas tibiae", innervatie: "N. femoralis", functie: "Extensie knie" },
+    en: { regio: "THIGH (Anterior)", origo: "Pelvis and femur (4 heads)", insertie: "Tibial tuberosity", innervatie: "Femoral nerve", functie: "Knee extension" }
+  },
+  "m_vastus_lateralis": {
+    naam: "M. vastus lateralis",
+    nl: { regio: "BOVENBEEN (Anterieur)", origo: "Linea aspera, trochanter major", insertie: "Tuberositas tibiae", innervatie: "N. femoralis", functie: "Extensie knie" },
+    en: { regio: "THIGH (Anterior)", origo: "Linea aspera, greater trochanter", insertie: "Tibial tuberosity", innervatie: "Femoral nerve", functie: "Knee extension" }
+  },
+  "m_vastus_medialis": {
+    naam: "M. vastus medialis",
+    nl: { regio: "BOVENBEEN (Anterieur)", origo: "Linea aspera, linea intertrochanterica", insertie: "Tuberositas tibiae", innervatie: "N. femoralis", functie: "Extensie knie" },
+    en: { regio: "THIGH (Anterior)", origo: "Linea aspera, intertrochanteric line", insertie: "Tibial tuberosity", innervatie: "Femoral nerve", functie: "Knee extension" }
+  },
+  "m_vastus_intermedius": {
+    naam: "M. vastus intermedius",
+    nl: { regio: "BOVENBEEN (Anterieur)", origo: "Corpus femoris (anterieur/lateraal)", insertie: "Tuberositas tibiae", innervatie: "N. femoralis", functie: "Extensie knie" },
+    en: { regio: "THIGH (Anterior)", origo: "Femoral shaft (anterior/lateral)", insertie: "Tibial tuberosity", innervatie: "Femoral nerve", functie: "Knee extension" }
+  },
+  "m_gastrocnemius": {
+    naam: "M. gastrocnemius",
+    nl: { regio: "ONDERBEEN (Posterieur)", origo: "Condylus medialis en lateralis femoris", insertie: "Tuber calcanei (achillespees)", innervatie: "N. tibialis", functie: "Plantairflexie enkel, Flexie knie" },
+    en: { regio: "LEG (Posterior)", origo: "Medial and lateral condyles of femur", insertie: "Calcaneal tuberosity (Achilles tendon)", innervatie: "Tibial nerve", functie: "Ankle plantarflexion, Knee flexion" }
+  },
+  "m_soleus": {
+    naam: "M. soleus",
+    nl: { regio: "ONDERBEEN (Posterieur)", origo: "Linea musculi solei, caput fibulae", insertie: "Tuber calcanei (achillespees)", innervatie: "N. tibialis", functie: "Plantairflexie enkel" },
+    en: { regio: "LEG (Posterior)", origo: "Soleal line, head of fibula", insertie: "Calcaneal tuberosity (Achilles tendon)", innervatie: "Tibial nerve", functie: "Ankle plantarflexion" }
+  },
+  "m_tibialis_anterior": {
+    naam: "M. tibialis anterior",
+    nl: { regio: "ONDERBEEN (Anterieur)", origo: "Facies lateralis tibiae", insertie: "Os cuneiforme mediale, os metatarsale I", innervatie: "N. fibularis profundus", functie: "Dorsaalflexie enkel, Inversie enkel" },
+    en: { regio: "LEG (Anterior)", origo: "Lateral surface of tibia", insertie: "Medial cuneiform, first metatarsal", innervatie: "Deep fibular nerve", functie: "Ankle dorsiflexion, Ankle inversion" }
+  },
+  "m_peroneus_longus": {
+    naam: "M. fibularis longus",
+    nl: { regio: "ONDERBEEN (Lateraal)", origo: "Caput fibulae, facies lateralis fibulae", insertie: "Os cuneiforme mediale, os metatarsale I", innervatie: "N. fibularis superficialis", functie: "Plantairflexie enkel, Eversie enkel" },
+    en: { regio: "LEG (Lateral)", origo: "Head of fibula, lateral surface of fibula", insertie: "Medial cuneiform, first metatarsal", innervatie: "Superficial fibular nerve", functie: "Ankle plantarflexion, Ankle eversion" }
+  },
+  "m_extensor_digitorum_longus": {
+    naam: "M. extensor digitorum longus",
+    nl: { regio: "ONDERBEEN (Anterieur)", origo: "Condylus lateralis tibiae, fibula", insertie: "Dorsale aponeurose tenen 2-5", innervatie: "N. fibularis profundus", functie: "Dorsaalflexie enkel, Eversie enkel" },
+    en: { regio: "LEG (Anterior)", origo: "Lateral condyle of tibia, fibula", insertie: "Dorsal aponeuroses of toes 2-5", innervatie: "Deep fibular nerve", functie: "Ankle dorsiflexion, Ankle eversion" }
+  },
+  "m_flexor_digitorum_longus": {
+    naam: "M. flexor digitorum longus",
+    nl: { regio: "ONDERBEEN (Posterieur)", origo: "Facies posterior tibiae", insertie: "Phalanges distales tenen 2-5", innervatie: "N. tibialis", functie: "Plantairflexie enkel, Inversie enkel" },
+    en: { regio: "LEG (Posterior)", origo: "Posterior surface of tibia", insertie: "Distal phalanges of toes 2-5", innervatie: "Tibial nerve", functie: "Ankle plantarflexion, Ankle inversion" }
+  },
+  "m_tibialis_posterior": {
+    naam: "M. tibialis posterior",
+    nl: { regio: "ONDERBEEN (Posterieur)", origo: "Membrana interossea, tibia, fibula", insertie: "Tuberositas ossis navicularis", innervatie: "N. tibialis", functie: "Plantairflexie enkel, Inversie enkel" },
+    en: { regio: "LEG (Posterior)", origo: "Interosseous membrane, tibia, fibula", insertie: "Tuberosity of navicular bone", innervatie: "Tibial nerve", functie: "Ankle plantarflexion, Ankle inversion" }
+  }
+};
+
+const updatedMuscles = userJson.map(m => {
+  const meta = muscleDataMap[m.spier];
+  return {
+    id: m.spier,
+    naam: meta.naam,
+    nl: meta.nl,
+    en: meta.en,
+    visualisatie: m.data
+  };
+});
+
+fs.writeFileSync('src/data.ts', `import { Muscle } from './types';\n\nexport const MUSCLES: Muscle[] = ${JSON.stringify(updatedMuscles, null, 2)};\n`);

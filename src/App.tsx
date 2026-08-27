@@ -141,6 +141,35 @@ export const t = {
   }
 };
 
+
+const getRegionImage = (muscle: Muscle | null, side: 'voor' | 'achter') => {
+  if (!muscle || !muscle.visualisatie) return `regio_boven_${side}.png`;
+  const regio = muscle.nl.regio.toLowerCase();
+  const isOnder = regio.includes('onderbeen') || regio.includes('voet') || regio.includes('enkel') || regio.includes('leg');
+  return isOnder ? `regio_onder_${side}.png` : `regio_boven_${side}.png`;
+};
+
+const ViewToggle = ({ side, setSide, language }: { side: 'voor'|'achter', setSide: (s: 'voor'|'achter') => void, language: Language }) => (
+  <div className="flex bg-slate-900/50 p-1 rounded-xl border border-white/10 w-full max-w-[300px] mx-auto mt-2 mb-4 z-20 relative">
+    <button
+      onClick={(e) => { e.stopPropagation(); setSide('voor'); }}
+      className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-2 ${
+        side === 'voor' ? 'bg-cyan-500/20 text-cyan-300 shadow-[0_0_10px_rgba(6,182,212,0.2)]' : 'text-slate-400 hover:text-slate-200'
+      }`}
+    >
+      👁️ {language === 'nl' ? 'Vooraanzicht' : 'Anterior'}
+    </button>
+    <button
+      onClick={(e) => { e.stopPropagation(); setSide('achter'); }}
+      className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-2 ${
+        side === 'achter' ? 'bg-cyan-500/20 text-cyan-300 shadow-[0_0_10px_rgba(6,182,212,0.2)]' : 'text-slate-400 hover:text-slate-200'
+      }`}
+    >
+      🔄 {language === 'nl' ? 'Achteraanzicht' : 'Posterior'}
+    </button>
+  </div>
+);
+
 export default function App() {
   const [language, setLanguage] = useState<Language>(() => {
     return (localStorage.getItem('language') as Language) || 'nl';
@@ -153,7 +182,11 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'bieb' | 'oefenen' | 'pinpoint' | 'zenuwen'>('bieb');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMuscle, setSelectedMuscle] = useState<Muscle | null>(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);  const [viewSideBieb, setViewSideBieb] = useState<'voor' | 'achter'>('voor');
+  const [viewSideOefenen, setViewSideOefenen] = useState<'voor' | 'achter'>('voor');
+  const [viewSidePinPoint, setViewSidePinPoint] = useState<'voor' | 'achter'>('voor');
+
+
 
   // PWA Install State
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -237,6 +270,24 @@ export default function App() {
   const [shakeMovement, setShakeMovement] = useState<string | null>(null);
   const [isSharing, setIsSharing] = useState(false);
   const flexCardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (selectedMuscle) {
+      setViewSideBieb(selectedMuscle.visualisatie[0]?.image.includes('achter') ? 'achter' : 'voor');
+    }
+  }, [selectedMuscle]);
+
+  useEffect(() => {
+    if (currentPracticeMuscle) {
+      setViewSideOefenen(currentPracticeMuscle.visualisatie[0]?.image.includes('achter') ? 'achter' : 'voor');
+    }
+  }, [currentPracticeMuscle]);
+
+  useEffect(() => {
+    if (pinPointMuscle) {
+      setViewSidePinPoint(pinPointMuscle.visualisatie[0]?.image.includes('achter') ? 'achter' : 'voor');
+    }
+  }, [pinPointMuscle]);
 
   const getStreakTitle = (s: number) => {
     if (s <= 5) return 'Stagiair';
@@ -332,20 +383,30 @@ export default function App() {
     
     setPinPointClick({ x, y });
 
-    const actualX = parseFloat(pinPointTarget === 'origo' ? pinPointMuscle.visualisatie.origo_x : pinPointMuscle.visualisatie.insertie_x);
-    const actualY = parseFloat(pinPointTarget === 'origo' ? pinPointMuscle.visualisatie.origo_y : pinPointMuscle.visualisatie.insertie_y);
-
-    const distance = Math.sqrt(Math.pow(x - actualX, 2) + Math.pow(y - actualY, 2));
+    // Find all valid targets on the current side
+    const validTargets = pinPointMuscle.visualisatie.filter(p => p.type === pinPointTarget && p.image.includes(viewSidePinPoint));
     
+    let minDistance = Infinity;
+    
+    if (validTargets.length > 0) {
+      validTargets.forEach(target => {
+        const actualX = parseFloat(target.x);
+        const actualY = parseFloat(target.y);
+        const d = Math.sqrt(Math.pow(x - actualX, 2) + Math.pow(y - actualY, 2));
+        if (d < minDistance) minDistance = d;
+      });
+    }
+
     let xp = 0;
     let message = t[language].miss;
-    if (distance < 3) { xp = 100; message = t[language].bullseye; }
-    else if (distance < 6) { xp = 75; message = t[language].great; }
-    else if (distance < 10) { xp = 50; message = t[language].close; }
+    
+    if (minDistance < 3) { xp = 100; message = t[language].bullseye; }
+    else if (minDistance < 6) { xp = 75; message = t[language].great; }
+    else if (minDistance < 10) { xp = 50; message = t[language].close; }
 
     setPinPointXp(prev => prev + xp);
-    setPinPointFeedback({ distance, xp, message });
-    setPinPointHistory(prev => [...prev, { naam: pinPointMuscle.naam, target: pinPointTarget, distance, xp }]);
+    setPinPointFeedback({ distance: minDistance, xp, message });
+    setPinPointHistory(prev => [...prev, { naam: pinPointMuscle.naam, target: pinPointTarget, distance: minDistance, xp }]);
   };
 
   const handlePinPointNext = () => {
@@ -903,14 +964,18 @@ const handleMovementClick = (movement: string) => {
                   </motion.div>
                 )}
               </AnimatePresence>
-              <div className="relative inline-block h-full w-full flex items-center justify-center">
+              <div className="w-full flex flex-col items-center absolute top-2 left-0 right-0 z-20 pointer-events-auto">
+                  <ViewToggle side={viewSideOefenen} setSide={setViewSideOefenen} language={language} />
+                </div>
+                <div className="relative inline-block h-full w-full flex items-center justify-center pt-16">
                 <img 
-                  src={currentPracticeMuscle.visualisatie.basis_weergave} 
+                  src={getRegionImage(currentPracticeMuscle, viewSideOefenen)} 
                   alt="Skelet" 
                   className="max-h-full max-w-full object-contain pointer-events-none opacity-80 mix-blend-screen"
                   onError={(e) => { e.currentTarget.src = "https://placehold.co/400x800/1e293b/334155?text=Skelet"; }}
                 />
-                <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                
+                                <svg className="absolute inset-0 w-full h-full pointer-events-none">
                   <defs>
                     <linearGradient id="neonGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                       <stop offset="0%" stopColor="#22d3ee" />
@@ -924,35 +989,37 @@ const handleMovementClick = (movement: string) => {
                       </feMerge>
                     </filter>
                   </defs>
-                  <line 
-                    x1={currentPracticeMuscle.visualisatie.origo_x} 
-                    y1={currentPracticeMuscle.visualisatie.origo_y} 
-                    x2={currentPracticeMuscle.visualisatie.insertie_x} 
-                    y2={currentPracticeMuscle.visualisatie.insertie_y} 
-                    stroke="url(#neonGradient)" 
-                    strokeWidth="6"
-                    strokeLinecap="round"
-                    filter="url(#neonGlowThick)"
-                    className="opacity-90"
-                  />
+                  {currentPracticeMuscle.visualisatie.filter(p => p.image.includes(viewSideOefenen) && p.type === 'origo').map((origo, oIdx) => (
+                    currentPracticeMuscle.visualisatie.filter(p => p.image.includes(viewSideOefenen) && p.type === 'insertie').map((insertie, iIdx) => (
+                      <line 
+                        key={`line-${oIdx}-${iIdx}`}
+                        x1={origo.x} 
+                        y1={origo.y} 
+                        x2={insertie.x} 
+                        y2={insertie.y} 
+                        stroke="url(#neonGradient)" 
+                        strokeWidth="6"
+                        strokeLinecap="round"
+                        filter="url(#neonGlowThick)"
+                        className="opacity-90"
+                      />
+                    ))
+                  ))}
                 </svg>
-                {/* Origo Dot */}
-                <div 
-                  className="absolute w-4 h-4 rounded-full bg-fuchsia-400 border-2 border-slate-900 shadow-[0_0_15px_rgba(232,121,249,0.8)] -translate-x-1/2 -translate-y-1/2 z-10"
-                  style={{ left: currentPracticeMuscle.visualisatie.origo_x, top: currentPracticeMuscle.visualisatie.origo_y }}
-                >
-                  <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-fuchsia-300 uppercase tracking-wider bg-slate-900/80 px-2 py-0.5 rounded-full border border-fuchsia-500/30">{t[language].origo}</div>
-                </div>
-                {/* Insertie Dot */}
-                <div 
-                  className="absolute w-4 h-4 rounded-full bg-cyan-400 border-2 border-slate-900 shadow-[0_0_15px_rgba(34,211,238,0.8)] -translate-x-1/2 -translate-y-1/2 z-10"
-                  style={{ left: currentPracticeMuscle.visualisatie.insertie_x, top: currentPracticeMuscle.visualisatie.insertie_y }}
-                >
-                  <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-cyan-300 uppercase tracking-wider bg-slate-900/80 px-2 py-0.5 rounded-full border border-cyan-500/30">{t[language].insertion}</div>
-                </div>
+                {/* Dots */}
+                {currentPracticeMuscle.visualisatie.filter(p => p.image.includes(viewSideOefenen)).map((point, idx) => (
+                  <div 
+                    key={`dot-${idx}`}
+                    className={`absolute w-4 h-4 rounded-full border-2 border-slate-900 -translate-x-1/2 -translate-y-1/2 z-10 ${point.type === 'origo' ? 'bg-fuchsia-400 shadow-[0_0_15px_rgba(232,121,249,0.8)]' : 'bg-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.8)]'}`}
+                    style={{ left: point.x, top: point.y }}
+                  >
+                    <div className={`absolute ${point.type === 'origo' ? '-top-6' : '-bottom-6'} left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-wider bg-slate-900/80 px-2 py-0.5 rounded-full border ${point.type === 'origo' ? 'text-fuchsia-300 border-fuchsia-500/30' : 'text-cyan-300 border-cyan-500/30'}`}>
+                      {point.type === 'origo' ? t[language].origo : t[language].insertion}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-
             {/* Controls */}
             <div className="flex flex-col gap-4 shrink-0 pb-6">
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
@@ -1032,19 +1099,23 @@ const handleMovementClick = (movement: string) => {
             </div>
 
             {/* Pin-Point Playfield */}
-            <div className="relative flex-1 min-h-[400px] mb-4 bg-slate-900/60 rounded-3xl border border-white/10 overflow-hidden shadow-[inset_0_0_50px_rgba(0,0,0,0.5)] flex items-center justify-center py-4">
+            <div className="relative flex-1 min-h-0 mb-4 bg-slate-900/60 rounded-3xl border border-white/10 overflow-hidden shadow-[inset_0_0_50px_rgba(0,0,0,0.5)] flex items-center justify-center p-2 sm:p-4">
+              <div className="w-full flex flex-col items-center absolute top-2 left-0 right-0 z-20 pointer-events-auto">
+                  <ViewToggle side={viewSidePinPoint} setSide={setViewSidePinPoint} language={language} />
+                </div>
               <div 
-                className="relative inline-block h-[400px] max-w-full cursor-crosshair"
+                className="relative inline-block h-full w-full flex items-center justify-center cursor-crosshair pt-16"
                 onClick={handlePinPointClick}
               >
                 <img 
-                  src={pinPointMuscle.visualisatie.basis_weergave} 
+                  src={getRegionImage(pinPointMuscle, viewSidePinPoint)} 
                   alt="Skelet" 
-                  className="h-full w-auto object-contain pointer-events-none opacity-80 mix-blend-screen"
+                  className="max-h-full max-w-full object-contain pointer-events-none opacity-80 mix-blend-screen"
                   onError={(e) => { e.currentTarget.src = "https://placehold.co/400x800/1e293b/334155?text=Skelet"; }}
                 />
                 {pinPointClick && pinPointFeedback && (
                   <>
+                    {(pinPointMuscle.visualisatie.some(p => p.image.includes(viewSidePinPoint))) && (
                     <svg className="absolute inset-0 w-full h-full pointer-events-none">
                       <line 
                         x1={`${pinPointClick.x}%`} 
@@ -1056,6 +1127,7 @@ const handleMovementClick = (movement: string) => {
                         strokeDasharray="4 4"
                       />
                     </svg>
+                    )}
                     {/* User Click Dot */}
                     <div 
                       className="absolute w-4 h-4 rounded-full bg-white border-2 border-slate-900 shadow-[0_0_15px_rgba(255,255,255,0.8)] -translate-x-1/2 -translate-y-1/2 z-20"
@@ -1258,14 +1330,17 @@ const handleMovementClick = (movement: string) => {
 
               {/* Added Visualizer to Bieb */}
               <div className="flex justify-center bg-slate-950/50 rounded-2xl border border-white/5 py-4 mb-6">
-                <div className="relative inline-block h-[200px] sm:h-[250px]">
+                <div className="w-full flex flex-col items-center">
+                    <ViewToggle side={viewSideBieb} setSide={setViewSideBieb} language={language} />
+                  </div>
+                  <div className="relative inline-block h-[250px] sm:h-[300px] w-full flex items-center justify-center">
                   <img 
-                    src={selectedMuscle.visualisatie.basis_weergave} 
+                    src={getRegionImage(selectedMuscle, viewSideBieb)} 
                     alt="Skelet" 
-                    className="h-full w-auto object-contain pointer-events-none opacity-80 mix-blend-screen"
+                    className="max-h-full max-w-full object-contain pointer-events-none opacity-80 mix-blend-screen"
                     onError={(e) => { e.currentTarget.src = "https://placehold.co/400x800/1e293b/334155?text=Skelet"; }}
                   />
-                  <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                  {selectedMuscle && (selectedMuscle.visualisatie.some(p => p.image.includes(viewSideBieb))) && (<>                <svg className="absolute inset-0 w-full h-full pointer-events-none">
                     <defs>
                       <linearGradient id="neonGradientModal" x1="0%" y1="0%" x2="100%" y2="100%">
                         <stop offset="0%" stopColor="#22d3ee" />
@@ -1299,6 +1374,7 @@ const handleMovementClick = (movement: string) => {
                     className="absolute w-3 h-3 rounded-full bg-cyan-400 border border-slate-900 shadow-[0_0_10px_rgba(34,211,238,0.8)] -translate-x-1/2 -translate-y-1/2 z-10"
                     style={{ left: selectedMuscle.visualisatie.insertie_x, top: selectedMuscle.visualisatie.insertie_y }}
                   />
+                  </>)}
                 </div>
               </div>
 
