@@ -925,7 +925,7 @@ const handleMovementClick = (movement: string) => {
                     {language === 'nl' ? 'Master je anatomie en klinisch redeneren.' : 'Master your anatomy and clinical reasoning.'}
                   </p>
                 </div>
-                <div className="text-5xl drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">🦴</div>
+                <div className="text-5xl drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">💪</div>
               </div>
               <div className="grid grid-cols-2 gap-3 mt-6 relative z-10">
                 <div className="bg-slate-900/50 backdrop-blur-sm rounded-2xl p-3 border border-white/5 flex flex-col items-center justify-center">
@@ -1027,12 +1027,12 @@ const handleMovementClick = (movement: string) => {
                             <div className="w-full flex flex-col items-center absolute top-2 left-0 right-0 z-20 pointer-events-auto">
                 <ViewToggle side={viewSideOefenen} setSide={setViewSideOefenen} language={language} />
               </div>
-              <div className="flex w-full h-full items-center justify-center pt-16 overflow-hidden">
-                <div className="relative inline-block" style={{ width: "fit-content", height: "fit-content", maxHeight: "100%" }}>
+              <div className="flex w-full h-full items-center justify-center pt-8 overflow-hidden min-h-0 shrink">
+                <div className="relative inline-block min-h-0 shrink">
                   <img 
                     src={getRegionImage(currentPracticeMuscle, viewSideOefenen)} 
                     alt="Skelet" 
-                    className="block pointer-events-none opacity-80 mix-blend-screen" style={{ display: "block", maxWidth: "100%", maxHeight: "100%", height: "auto" }}
+                    className="block pointer-events-none opacity-80 mix-blend-screen max-h-[42vh] sm:max-h-[55vh] w-auto object-contain shrink"
                     onError={(e) => { e.currentTarget.src = "https://placehold.co/400x800/1e293b/334155?text=Skelet"; }}
                   />
                   {currentPracticeMuscle && currentPracticeMuscle.visualisatie.some(p => p.image.includes(viewSideOefenen)) && (
@@ -1168,15 +1168,15 @@ const handleMovementClick = (movement: string) => {
               <div className="w-full flex flex-col items-center absolute top-2 left-0 right-0 z-20 pointer-events-auto">
                 <ViewToggle side={viewSidePinPoint} setSide={setViewSidePinPoint} language={language} />
               </div>
-              <div className="flex w-full h-full items-center justify-center pt-16 overflow-hidden">
+              <div className="flex w-full h-full items-center justify-center pt-8 overflow-hidden relative min-h-0 shrink">
                 <div 
-                  className="relative inline-block cursor-crosshair" style={{ width: "fit-content", height: "fit-content", maxHeight: "100%" }}
+                  className="relative inline-block cursor-crosshair min-h-0 shrink"
                   onClick={handlePinPointClick}
                 >
                   <img 
                     src={getRegionImage(pinPointMuscle, viewSidePinPoint)} 
                     alt="Skelet" 
-                    className="block pointer-events-none opacity-80 mix-blend-screen" style={{ display: "block", maxWidth: "100%", maxHeight: "100%", height: "auto" }}
+                    className="block pointer-events-none opacity-80 mix-blend-screen max-h-[42vh] sm:max-h-[55vh] w-auto object-contain shrink"
                     onError={(e) => { e.currentTarget.src = "https://placehold.co/400x800/1e293b/334155?text=Skelet"; }}
                   />
                   {pinPointClick && pinPointFeedback && (
@@ -1403,12 +1403,12 @@ const handleMovementClick = (movement: string) => {
                 <div className="w-full flex flex-col items-center">
                   <ViewToggle side={viewSideBieb} setSide={setViewSideBieb} language={language} />
                   
-                  <div className="flex w-full h-[250px] sm:h-[300px] items-center justify-center overflow-hidden">
-                    <div className="relative inline-block mt-4" style={{ width: "fit-content", height: "fit-content", maxHeight: "100%" }}>
+                  <div className="flex w-full items-center justify-center overflow-hidden min-h-0 shrink">
+                    <div className="relative inline-block mt-2 min-h-0 shrink">
                       <img 
                         src={getRegionImage(selectedMuscle, viewSideBieb)} 
                         alt="Skelet" 
-                        className="block pointer-events-none opacity-80 mix-blend-screen" style={{ display: "block", maxWidth: "100%", maxHeight: "100%", height: "auto" }}
+                        className="block pointer-events-none opacity-80 mix-blend-screen max-h-[42vh] sm:max-h-[55vh] w-auto object-contain shrink"
                         onError={(e) => { e.currentTarget.src = "https://placehold.co/400x800/1e293b/334155?text=Skelet"; }}
                       />
                       {selectedMuscle && selectedMuscle.visualisatie.some(p => p.image.includes(viewSideBieb)) && (
@@ -1520,12 +1520,12 @@ const handleMovementClick = (movement: string) => {
               <div className="w-full flex flex-col items-center absolute top-2 left-0 right-0 z-20 pointer-events-auto">
                 <ViewToggle side={viewSideQuiz} setSide={setViewSideQuiz} language={language} />
               </div>
-              <div className="flex w-full h-full items-center justify-center pt-16 overflow-hidden">
-                <div className="relative inline-block" style={{ width: "fit-content", height: "fit-content", maxHeight: "100%" }}>
+              <div className="flex w-full h-full items-center justify-center pt-8 overflow-hidden min-h-0 shrink">
+                <div className="relative inline-block min-h-0 shrink">
                   <img 
                     src={getRegionImage(quizMuscle, viewSideQuiz)} 
                     alt="Skelet" 
-                    className="block pointer-events-none opacity-80 mix-blend-screen" style={{ display: "block", maxWidth: "100%", maxHeight: "100%", height: "auto" }}
+                    className="block pointer-events-none opacity-80 mix-blend-screen max-h-[42vh] sm:max-h-[55vh] w-auto object-contain shrink"
                     onError={(e) => { e.currentTarget.src = "https://placehold.co/400x800/1e293b/334155?text=Skelet"; }}
                   />
                   {quizMuscle && quizMuscle.visualisatie.some(p => p.image.includes(viewSideQuiz)) && (
