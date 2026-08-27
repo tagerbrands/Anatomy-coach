@@ -13,6 +13,7 @@ import {
   Activity,
   X,
   ChevronRight,
+  ChevronLeft,
   Info,
   Flame,
   Share2,
@@ -27,9 +28,9 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 
 const MOVEMENTS = [
-  'Flexie', 'Extensie', 'Abductie', 'Adductie', 
-  'Endorotatie', 'Exorotatie', 'Plantairflexie', 
-  'Dorsaalflexie', 'Inversie', 'Eversie'
+  'Flexie', 'Extensie', 'Anteflexie', 'Dorsoflexie', 'Abductie', 'Adductie',
+  'Endorotatie', 'Exorotatie', 'Plantairflexie', 'Dorsaalflexie',
+  'Inversie', 'Eversie'
 ];
 
 
@@ -82,8 +83,8 @@ export const t = {
     iosInstallBody: "Tik op het Deel-icoon onderin je scherm en kies 'Zet op beginscherm'.",
     closeBtn: "Sluit",
     movements: {
-      'Flexie': 'Flexie', 'Extensie': 'Extensie', 'Abductie': 'Abductie', 'Adductie': 'Adductie', 
-      'Endorotatie': 'Endorotatie', 'Exorotatie': 'Exorotatie', 'Plantairflexie': 'Plantairflexie', 
+      'Flexie': 'Flexie', 'Extensie': 'Extensie', 'Anteflexie': 'Anteflexie', 'Dorsoflexie': 'Dorsoflexie', 'Abductie': 'Abductie', 'Adductie': 'Adductie',
+      'Endorotatie': 'Endorotatie', 'Exorotatie': 'Exorotatie', 'Plantairflexie': 'Plantairflexie',
       'Dorsaalflexie': 'Dorsaalflexie', 'Inversie': 'Inversie', 'Eversie': 'Eversie'
     }
   },
@@ -133,8 +134,8 @@ export const t = {
     iosInstallBody: "Tap the Share icon below and choose 'Add to Home Screen'.",
     closeBtn: "Close",
     movements: {
-      'Flexie': 'Flexion', 'Extensie': 'Extension', 'Abductie': 'Abduction', 'Adductie': 'Adduction', 
-      'Endorotatie': 'Internal Rotation', 'Exorotatie': 'External Rotation', 'Plantairflexie': 'Plantar Flexion', 
+      'Flexie': 'Flexion', 'Extensie': 'Extension', 'Anteflexie': 'Anteflexion', 'Dorsoflexie': 'Dorsoflexion', 'Abductie': 'Abduction', 'Adductie': 'Adduction',
+      'Endorotatie': 'Internal Rotation', 'Exorotatie': 'External Rotation', 'Plantairflexie': 'Plantar Flexion',
       'Dorsaalflexie': 'Dorsiflexion', 'Inversie': 'Inversion', 'Eversie': 'Eversion'
     }
   }
@@ -205,6 +206,7 @@ export default function App() {
   const [pinPointRound, setPinPointRound] = useState(1);
   const [pinPointHistory, setPinPointHistory] = useState<Array<{ naam: string, target: string, distance: number, xp: number }>>([]);
   const [isPinPointFinished, setIsPinPointFinished] = useState(false);
+  const [pinPointShareFile, setPinPointShareFile] = useState<File | null>(null);
   const [pinPointXp, setPinPointXp] = useState(0);
   const [pinPointMuscle, setPinPointMuscle] = useState<Muscle | null>(null);
   const [pinPointTarget, setPinPointTarget] = useState<'origo' | 'insertie'>('origo');
@@ -229,6 +231,7 @@ export default function App() {
 
   // Oefenen State
   const [currentPracticeMuscle, setCurrentPracticeMuscle] = useState<Muscle | null>(null);
+  const [practiceOptions, setPracticeOptions] = useState<string[]>([]);
   const [streak, setStreak] = useState(0);
   const [guessedMovements, setGuessedMovements] = useState<Record<string, 'correct' | 'incorrect'>>({});
   const [shakeMovement, setShakeMovement] = useState<string | null>(null);
@@ -370,54 +373,59 @@ export default function App() {
     return [...pinPointHistory].sort((a, b) => b.distance - a.distance)[0];
   }, [pinPointHistory]);
 
+  
+  
   const handleSharePinPoint = async () => {
-    if (!pinPointFlexCardRef.current || isSharing) return;
-    
+    if (isSharing) return;
     setIsSharing(true);
     try {
-      const canvas = await html2canvas(pinPointFlexCardRef.current, {
-        backgroundColor: '#020617',
-        scale: 2,
-        logging: false,
-        useCORS: true
-      });
+      const shareData: any = {
+        title: 'MSK Coach Locatie Score',
+        text: t[language].shareTextPinPoint.replace("{xp}", pinPointXp.toString()).replace("{rank}", getPinPointRank(pinPointXp)),
+      };
+      
+      if (pinPointShareFile) {
+        shareData.files = [pinPointShareFile];
+      }
 
-      canvas.toBlob(async (blob) => {
-        if (!blob) {
-          setIsSharing(false);
-          return;
-        }
-
-        const file = new File([blob], `anatomy-vibe-pinpoint-${pinPointXp}.png`, { type: 'image/png' });
-        const shareData = {
-          title: 'MSK Coach Locatie Score',
-          text: t[language].shareTextPinPoint.replace("{xp}", pinPointXp.toString()).replace("{rank}", getPinPointRank(pinPointXp)),
-          files: [file]
-        };
-
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          try {
-            await navigator.share(shareData);
-          } catch (err) {
-            console.log("Share annuleren", err);
-          }
-        } else {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = file.name;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-        }
-        setIsSharing(false);
-      }, 'image/png');
+      if (navigator.canShare && (pinPointShareFile ? navigator.canShare({ files: shareData.files }) : navigator.canShare({ text: shareData.text }))) {
+        await navigator.share(shareData);
+      } else if (pinPointShareFile) {
+        const url = URL.createObjectURL(pinPointShareFile);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = pinPointShareFile.name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
     } catch (err) {
       console.error(err);
-      setIsSharing(false);
     }
+    setIsSharing(false);
   };
+
+  useEffect(() => {
+    if (isPinPointFinished && pinPointFlexCardRef.current) {
+      setTimeout(() => {
+        html2canvas(pinPointFlexCardRef.current!, {
+          backgroundColor: '#020617',
+          scale: 2,
+          logging: false,
+          useCORS: true
+        }).then(canvas => {
+          canvas.toBlob(blob => {
+            if (blob) {
+              setPinPointShareFile(new File([blob], `anatomy-vibe-pinpoint-${pinPointXp}.png`, { type: 'image/png' }));
+            }
+          }, 'image/png');
+        }).catch(err => console.error(err));
+      }, 500); // Give it a bit to render
+    } else {
+      setPinPointShareFile(null);
+    }
+  }, [isPinPointFinished, pinPointXp]);
 
   // Zenuwen Logic
   useEffect(() => {
@@ -568,6 +576,23 @@ export default function App() {
     const randomMuscle = MUSCLES[Math.floor(Math.random() * MUSCLES.length)];
     setCurrentPracticeMuscle(randomMuscle);
     setGuessedMovements({});
+    
+    // Generate 6 options
+    const correctOptions = MOVEMENTS.filter(m => checkMovementMatch(m, randomMuscle[language].functie));
+    let incorrectOptions = MOVEMENTS.filter(m => !correctOptions.includes(m));
+    
+    // Shuffle incorrectOptions
+    incorrectOptions.sort(() => 0.5 - Math.random());
+    
+    // Pick enough incorrect to make 6 total (if possible, else use all)
+    const needed = Math.max(0, 6 - correctOptions.length);
+    const selectedIncorrect = incorrectOptions.slice(0, needed);
+    
+    const combined = [...correctOptions, ...selectedIncorrect];
+    // Shuffle combined
+    combined.sort(() => 0.5 - Math.random());
+    
+    setPracticeOptions(combined);
   };
 
   const handleNextMuscle = () => {
@@ -580,12 +605,42 @@ export default function App() {
     setSelectedMuscle(currentPracticeMuscle);
   };
 
-  const handleMovementClick = (movement: string) => {
+
+  
+  const checkMovementMatch = (movement: string, funcText: string) => {
+    let text = funcText.toLowerCase();
+    const mov = movement.toLowerCase();
+
+    if (mov === 'anteflexie') {
+      return /anteflex|flexie heup|hip flexion|flexie van de heup|flexes the hip/i.test(funcText);
+    }
+    if (mov === 'dorsoflexie') {
+      return /dorsoflex|retroflex|extensie heup|hip extension|extensie van de heup|extends the hip/i.test(funcText);
+    }
+    if (mov === 'flexie') {
+      text = text.replace(/plantairflexie|plantarflexion|plantar flexion|dorsaalflexie|dorsiflexion|anteflexie|dorsoflexie|flexie heup|hip flexion|flexie van de heup|flexes the hip/gi, '');
+      return text.includes('flex');
+    }
+    if (mov === 'extensie') {
+      text = text.replace(/extensie heup|hip extension|extensie van de heup|extends the hip/gi, '');
+      return text.includes('exten');
+    }
+    if (mov === 'abductie') return text.includes('abduc');
+    if (mov === 'adductie') return text.includes('adduc');
+    if (mov === 'endorotatie') return /endorot|internal rot|inwaartse rot|medial rot/.test(text);
+    if (mov === 'exorotatie') return /exorot|external rot|buitenwaartse rot|lateral rot/.test(text);
+    if (mov === 'plantairflexie') return /plantair|plantar/.test(text);
+    if (mov === 'dorsaalflexie') return /dorsaal|dorsi/.test(text);
+    if (mov === 'inversie') return text.includes('invers');
+    if (mov === 'eversie') return text.includes('evers');
+
+    return false;
+  };
+const handleMovementClick = (movement: string) => {
     if (!currentPracticeMuscle) return;
     if (guessedMovements[movement] === 'correct') return;
 
-    const translatedMovement = t[language].movements[movement as keyof typeof t.nl.movements];
-    const hasMovement = currentPracticeMuscle[language].functie.toLowerCase().includes(translatedMovement.toLowerCase());
+    const hasMovement = checkMovementMatch(movement, currentPracticeMuscle[language].functie);
     
     if (hasMovement) {
       setGuessedMovements(prev => ({ ...prev, [movement]: 'correct' }));
@@ -604,8 +659,18 @@ export default function App() {
     });
   }, [currentPracticeMuscle]);
 
-  const isMuscleComplete = currentPracticeMuscle && 
-    (correctMovementsForCurrent.length === 0 || correctMovementsForCurrent.every(m => guessedMovements[m] === 'correct'));
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
+
+  const correctPracticeOptions = currentPracticeMuscle ? practiceOptions.filter(m => checkMovementMatch(m, currentPracticeMuscle[language].functie)) : [];
+  const isMuscleComplete = currentPracticeMuscle && correctPracticeOptions.length > 0 && correctPracticeOptions.every(m => guessedMovements[m] === 'correct');
+
+  useEffect(() => {
+    if (isMuscleComplete) {
+      setShowSuccessAnimation(true);
+      const t = setTimeout(() => setShowSuccessAnimation(false), 1500);
+      return () => clearTimeout(t);
+    }
+  }, [isMuscleComplete]);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-cyan-500/30 overflow-hidden relative flex flex-col">
@@ -718,7 +783,7 @@ export default function App() {
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto p-4 pb-24 z-10 scrollbar-hide">
+      <main className="flex-1 overflow-y-auto p-3 sm:p-4 pb-20 z-10 scrollbar-hide flex flex-col">
         {activeTab === 'bieb' && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -727,7 +792,32 @@ export default function App() {
             className="flex flex-col gap-4 max-w-2xl mx-auto"
           >
             {/* Search & Filter */}
-            <div className="flex flex-col gap-3 sticky top-0 bg-slate-950/80 backdrop-blur-md p-2 -mx-2 z-20 rounded-xl">
+            
+            {/* Hero Section */}
+            <div className="bg-gradient-to-br from-cyan-900/40 to-fuchsia-900/40 rounded-3xl p-6 border border-white/10 mb-2 shadow-2xl relative overflow-hidden shrink-0 mt-2">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-fuchsia-500/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+              <div className="relative z-10 flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl sm:text-3xl font-black text-white mb-2 tracking-tight">MSK <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-400">Coach</span></h2>
+                  <p className="text-slate-300 text-sm max-w-[200px] leading-relaxed">
+                    {language === 'nl' ? 'Master je anatomie en klinisch redeneren.' : 'Master your anatomy and clinical reasoning.'}
+                  </p>
+                </div>
+                <div className="text-5xl drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">🦴</div>
+              </div>
+              <div className="grid grid-cols-2 gap-3 mt-6 relative z-10">
+                <div className="bg-slate-900/50 backdrop-blur-sm rounded-2xl p-3 border border-white/5 flex flex-col items-center justify-center">
+                  <span className="text-2xl font-bold text-cyan-400 mb-1">{MUSCLES.length}</span>
+                  <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Spieren</span>
+                </div>
+                <div className="bg-slate-900/50 backdrop-blur-sm rounded-2xl p-3 border border-white/5 flex flex-col items-center justify-center">
+                  <span className="text-2xl font-bold text-fuchsia-400 mb-1">3</span>
+                  <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Gamemodes</span>
+                </div>
+              </div>
+            </div>
+<div className="flex flex-col gap-3 sticky top-0 bg-slate-950/80 backdrop-blur-md p-2 -mx-2 z-20 rounded-xl">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <input
@@ -770,7 +860,7 @@ export default function App() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col h-full max-w-2xl mx-auto"
+            className="flex flex-col flex-1 min-h-0 w-full max-w-2xl mx-auto"
           >
             {/* Oefenen Top Bar */}
             <div className="flex justify-between items-center mb-4 bg-white/5 backdrop-blur-md rounded-2xl p-4 border border-white/10 shrink-0">
@@ -794,18 +884,40 @@ export default function App() {
             </div>
 
             {/* Playfield */}
-            <div className="relative flex-1 min-h-[350px] mb-4 bg-slate-900/60 rounded-3xl border border-white/10 overflow-hidden shadow-[inset_0_0_50px_rgba(0,0,0,0.5)] flex items-center justify-center py-4">
-              <div className="relative inline-block h-[350px] max-w-full">
+            <div className="relative flex-1 min-h-0 mb-4 bg-slate-900/60 rounded-3xl border border-white/10 overflow-hidden shadow-[inset_0_0_50px_rgba(0,0,0,0.5)] flex items-center justify-center p-2 sm:p-4">
+              <AnimatePresence>
+                {showSuccessAnimation && (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 z-20 flex items-center justify-center bg-emerald-500/20 backdrop-blur-sm"
+                  >
+                    <motion.div 
+                      initial={{ y: 20 }}
+                      animate={{ y: 0 }}
+                      className="bg-emerald-500 text-white font-black text-3xl sm:text-5xl px-8 py-4 rounded-3xl shadow-[0_0_40px_rgba(16,185,129,0.8)] border border-white/20"
+                    >
+                      {t[language].correct} 🎉
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              <div className="relative inline-block h-full w-full flex items-center justify-center">
                 <img 
                   src={currentPracticeMuscle.visualisatie.basis_weergave} 
                   alt="Skelet" 
-                  className="h-full w-auto object-contain pointer-events-none opacity-80 mix-blend-screen"
+                  className="max-h-full max-w-full object-contain pointer-events-none opacity-80 mix-blend-screen"
                   onError={(e) => { e.currentTarget.src = "https://placehold.co/400x800/1e293b/334155?text=Skelet"; }}
                 />
                 <svg className="absolute inset-0 w-full h-full pointer-events-none">
                   <defs>
-                    <filter id="neonGlow">
-                      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                    <linearGradient id="neonGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#22d3ee" />
+                      <stop offset="100%" stopColor="#e879f9" />
+                    </linearGradient>
+                    <filter id="neonGlowThick">
+                      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
                       <feMerge>
                         <feMergeNode in="coloredBlur"/>
                         <feMergeNode in="SourceGraphic"/>
@@ -817,10 +929,11 @@ export default function App() {
                     y1={currentPracticeMuscle.visualisatie.origo_y} 
                     x2={currentPracticeMuscle.visualisatie.insertie_x} 
                     y2={currentPracticeMuscle.visualisatie.insertie_y} 
-                    stroke="#06b6d4" 
-                    strokeWidth="3"
-                    filter="url(#neonGlow)"
-                    className="opacity-70"
+                    stroke="url(#neonGradient)" 
+                    strokeWidth="6"
+                    strokeLinecap="round"
+                    filter="url(#neonGlowThick)"
+                    className="opacity-90"
                   />
                 </svg>
                 {/* Origo Dot */}
@@ -843,7 +956,7 @@ export default function App() {
             {/* Controls */}
             <div className="flex flex-col gap-4 shrink-0 pb-6">
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
-                {MOVEMENTS.map(movement => {
+                {practiceOptions.map(movement => {
                   const status = guessedMovements[movement];
                   const isShaking = shakeMovement === movement;
                   let btnClass = "bg-white/5 text-slate-300 border-white/10 hover:bg-white/10";
@@ -898,7 +1011,7 @@ export default function App() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col h-full max-w-2xl mx-auto"
+            className="flex flex-col flex-1 min-h-0 w-full max-w-2xl mx-auto"
           >
             {/* Pin-Point Top Bar */}
             <div className="flex justify-between items-center mb-4 bg-white/5 backdrop-blur-md rounded-2xl p-4 border border-white/10 shrink-0 relative overflow-hidden">
@@ -999,7 +1112,7 @@ export default function App() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col h-full max-w-2xl mx-auto"
+            className="flex flex-col flex-1 min-h-0 w-full max-w-2xl mx-auto"
           >
             <div className="text-center mb-6 mt-4 hidden">
               <h2 className="text-slate-400 font-medium mb-1">{t[language].supplyPower}</h2>
@@ -1026,7 +1139,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6 flex-1 content-center">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 mb-2 flex-1 content-center min-h-0 overflow-y-auto scrollbar-hide">
               {nerveGrid.map((muscle, idx) => {
                 const isFound = foundNerves.includes(muscle.id);
                 const isShaking = shakingNerve === muscle.id;
@@ -1114,9 +1227,33 @@ export default function App() {
               </button>
 
               <div className="mb-6 pr-8 mt-10">
-                <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-white mt-3">
-                  {selectedMuscle.naam}
-                </h2>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-white pr-2">
+                    {selectedMuscle.naam}
+                  </h2>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const idx = MUSCLES.findIndex(m => m.id === selectedMuscle.id);
+                        setSelectedMuscle(MUSCLES[idx > 0 ? idx - 1 : MUSCLES.length - 1]);
+                      }}
+                      className="p-2 bg-white/5 rounded-full hover:bg-white/10 text-cyan-400 transition-colors"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const idx = MUSCLES.findIndex(m => m.id === selectedMuscle.id);
+                        setSelectedMuscle(MUSCLES[idx < MUSCLES.length - 1 ? idx + 1 : 0]);
+                      }}
+                      className="p-2 bg-white/5 rounded-full hover:bg-white/10 text-cyan-400 transition-colors"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {/* Added Visualizer to Bieb */}
@@ -1129,15 +1266,29 @@ export default function App() {
                     onError={(e) => { e.currentTarget.src = "https://placehold.co/400x800/1e293b/334155?text=Skelet"; }}
                   />
                   <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                    <defs>
+                      <linearGradient id="neonGradientModal" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#22d3ee" />
+                        <stop offset="100%" stopColor="#e879f9" />
+                      </linearGradient>
+                      <filter id="neonGlowThickModal">
+                        <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                        <feMerge>
+                          <feMergeNode in="coloredBlur"/>
+                          <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                      </filter>
+                    </defs>
                     <line 
                       x1={selectedMuscle.visualisatie.origo_x} 
                       y1={selectedMuscle.visualisatie.origo_y} 
                       x2={selectedMuscle.visualisatie.insertie_x} 
                       y2={selectedMuscle.visualisatie.insertie_y} 
-                      stroke="#06b6d4" 
-                      strokeWidth="2"
-                      strokeDasharray="4 4"
-                      className="opacity-70"
+                      stroke="url(#neonGradientModal)" 
+                      strokeWidth="6"
+                      strokeLinecap="round"
+                      filter="url(#neonGlowThickModal)"
+                      className="opacity-90"
                     />
                   </svg>
                   <div 
@@ -1340,6 +1491,16 @@ export default function App() {
                   <RotateCcw className="w-5 h-5" />
                   Speel Nog Een Ronde
                 </button>
+                <button 
+                  onClick={() => {
+                    setIsPinPointFinished(false);
+                    setActiveTab('bieb');
+                  }} 
+                  className="w-full py-3 rounded-xl bg-slate-800 text-slate-300 font-bold hover:bg-slate-700 transition-all flex items-center justify-center gap-2 mt-3"
+                >
+                  <Library className="w-5 h-5" />
+                  🏠 Terug naar Startmenu
+                </button>
               </div>
             </motion.div>
           </motion.div>
@@ -1446,6 +1607,16 @@ export default function App() {
                 >
                   <RotateCcw className="w-5 h-5" />
                   Speel Nog Een Ronde
+                </button>
+                <button 
+                  onClick={() => {
+                    setIsNerveFinished(false);
+                    setActiveTab('bieb');
+                  }} 
+                  className="w-full py-3 rounded-xl bg-slate-800 text-slate-300 font-bold hover:bg-slate-700 transition-all flex items-center justify-center gap-2 mt-3"
+                >
+                  <Library className="w-5 h-5" />
+                  🏠 Terug naar Startmenu
                 </button>
               </div>
             </motion.div>
