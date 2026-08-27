@@ -29,7 +29,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 
 const MOVEMENTS = [
-  'Flexie', 'Extensie', 'Anteflexie', 'Dorsoflexie', 'Abductie', 'Adductie',
+  'Knieflexie', 'Knie-extensie', 'Anteflexie', 'Dorsoflexie', 'Abductie', 'Adductie',
   'Endorotatie', 'Exorotatie', 'Plantairflexie', 'Dorsaalflexie',
   'Inversie', 'Eversie'
 ];
@@ -86,7 +86,7 @@ export const t = {
     iosInstallBody: "Tik op het Deel-icoon onderin je scherm en kies 'Zet op beginscherm'.",
     closeBtn: "Sluit",
     movements: {
-      'Flexie': 'Flexie', 'Extensie': 'Extensie', 'Anteflexie': 'Anteflexie', 'Dorsoflexie': 'Dorsoflexie', 'Abductie': 'Abductie', 'Adductie': 'Adductie',
+      'Knieflexie': 'Knieflexie', 'Knie-extensie': 'Knie-extensie', 'Anteflexie': 'Anteflexie', 'Dorsoflexie': 'Dorsoflexie', 'Abductie': 'Abductie', 'Adductie': 'Adductie',
       'Endorotatie': 'Endorotatie', 'Exorotatie': 'Exorotatie', 'Plantairflexie': 'Plantairflexie',
       'Dorsaalflexie': 'Dorsaalflexie', 'Inversie': 'Inversie', 'Eversie': 'Eversie'
     }
@@ -138,7 +138,7 @@ export const t = {
     iosInstallBody: "Tap the Share icon below and choose 'Add to Home Screen'.",
     closeBtn: "Close",
     movements: {
-      'Flexie': 'Flexion', 'Extensie': 'Extension', 'Anteflexie': 'Anteflexion', 'Dorsoflexie': 'Dorsoflexion', 'Abductie': 'Abduction', 'Adductie': 'Adduction',
+      'Knieflexie': 'Knee Flexion', 'Knie-extensie': 'Knee Extension', 'Anteflexie': 'Anteflexion', 'Dorsoflexie': 'Dorsoflexion', 'Abductie': 'Abduction', 'Adductie': 'Adduction',
       'Endorotatie': 'Internal Rotation', 'Exorotatie': 'External Rotation', 'Plantairflexie': 'Plantar Flexion',
       'Dorsaalflexie': 'Dorsiflexion', 'Inversie': 'Inversion', 'Eversie': 'Eversion'
     }
@@ -193,7 +193,7 @@ function MusclePlayfield({ muscle, language, children, showSuccess, successText,
   };
   const sides = getRequiredSides(muscle);
   return (
-    <div className="relative flex-1 min-h-[40vh] mb-2 bg-slate-900/40 sm:rounded-b-3xl border-b border-white/10 overflow-hidden flex flex-col items-center justify-center p-2 sm:p-4">
+    <div className="relative flex-1 min-h-[40vh] mb-4 sm:mb-6 bg-slate-900/40 sm:rounded-b-3xl border-b border-white/10 overflow-hidden flex flex-col items-center justify-center p-2 sm:p-4">
       <AnimatePresence>
         {showSuccess && (
           <motion.div 
@@ -221,7 +221,7 @@ function MusclePlayfield({ muscle, language, children, showSuccess, successText,
         </div>
       )}
 
-      <div className="flex w-full h-full items-center justify-center pt-4 overflow-hidden min-h-0 shrink gap-2 sm:gap-8">
+      <div className="flex w-full h-full items-center justify-center pt-4 pb-4 overflow-hidden min-h-0 shrink gap-2 sm:gap-8">
         {sides.map(side => {
            const isCurrentSidePinPoint = pinPointSide === side;
            return (
@@ -423,6 +423,7 @@ export default function App() {
   const [quizStreak, setQuizStreak] = useState(0);
   const [quizAnswered, setQuizAnswered] = useState(false);
   const [quizSelectedOption, setQuizSelectedOption] = useState<string | null>(null);
+  const [quizMistakeMade, setQuizMistakeMade] = useState(false);
   
   // Zenuwen State
   const [nerveRound, setNerveRound] = useState(1);
@@ -430,13 +431,12 @@ export default function App() {
   const [isNerveFinished, setIsNerveFinished] = useState(false);
   const [nerveXp, setNerveXp] = useState(0);
   const [nerveMistakesThisRound, setNerveMistakesThisRound] = useState(0);
-  const [targetNerveObj, setTargetNerveObj] = useState<{nl: string, en: string} | null>(null);
-  const targetNerve = targetNerveObj ? targetNerveObj[language] : '';
-  const [nerveGrid, setNerveGrid] = useState<Muscle[]>([]);
-  const [correctCountInGrid, setCorrectCountInGrid] = useState(0);
-  const [foundNerves, setFoundNerves] = useState<string[]>([]);
-  const [shakingNerve, setShakingNerve] = useState<string | null>(null);
-  const [isNerveLevelComplete, setIsNerveLevelComplete] = useState(false);
+  
+  const [nerveMuscle, setNerveMuscle] = useState<Muscle | null>(null);
+  const [nerveOptions, setNerveOptions] = useState<string[]>([]);
+  const [nerveAnswered, setNerveAnswered] = useState(false);
+  const [nerveSelectedOption, setNerveSelectedOption] = useState<string | null>(null);
+  
   const nerveFlexCardRef = useRef<HTMLDivElement>(null);
 
   // Oefenen State
@@ -547,6 +547,12 @@ export default function App() {
     pickRandomPinPoint();
   };
 
+  useEffect(() => {
+    if (activeTab === 'pinpoint' && !pinPointMuscle && !isPinPointFinished) {
+      startNewPinPointSession();
+    }
+  }, [activeTab]);
+
   const [pinPointSide, setPinPointSide] = React.useState<'voor' | 'achter'>('voor');
   const handlePinPointClick = (e: React.MouseEvent<HTMLDivElement>, x: number, y: number, side: 'voor' | 'achter') => {
     if (pinPointClick || !pinPointMuscle) return;
@@ -641,6 +647,7 @@ export default function App() {
     const randomMuscle = MUSCLES[Math.floor(Math.random() * MUSCLES.length)];
     setQuizMuscle(randomMuscle);
     setQuizAnswered(false);
+    setQuizMistakeMade(false);
     setQuizSelectedOption(null);
     setShowSuccessAnimation(false);
     
@@ -654,21 +661,22 @@ export default function App() {
   const handleQuizOptionClick = (optionName: string) => {
     if (quizAnswered || !quizMuscle) return;
     
-    setQuizAnswered(true);
     setQuizSelectedOption(optionName);
     
     if (optionName === quizMuscle.naam) {
-      setQuizStreak(s => s + 1);
+      setQuizAnswered(true);
+      if (!quizMistakeMade) setQuizStreak(s => s + 1);
       setShowSuccessAnimation(true);
       setTimeout(() => { setShowSuccessAnimation(false); startNewQuizRound(); }, 1200);
     } else {
       setQuizStreak(0);
+      setQuizMistakeMade(true);
     }
   };
 
 // Zenuwen Logic
   useEffect(() => {
-    if (activeTab === 'zenuwen' && !targetNerve && !isNerveFinished) {
+    if (activeTab === 'zenuwen' && !nerveMuscle && !isNerveFinished) {
       generateNerveRound();
     }
   }, [activeTab]);
@@ -684,52 +692,43 @@ export default function App() {
 
   const generateNerveRound = () => {
     setNerveMistakesThisRound(0);
+    setNerveAnswered(false);
+    setNerveSelectedOption(null);
+    setShowSuccessAnimation(false);
     
-    const randomNerveMuscle = MUSCLES[Math.floor(Math.random() * MUSCLES.length)];
-    const selectedNerveObj = { nl: randomNerveMuscle.nl.innervatie, en: randomNerveMuscle.en.innervatie };
-    setTargetNerveObj(selectedNerveObj);
-    const selectedNerve = selectedNerveObj[language];
-
-    const matchingMuscles = MUSCLES.filter(m => m[language].innervatie === selectedNerve);
-    const nonMatchingMuscles = MUSCLES.filter(m => m[language].innervatie !== selectedNerve);
-
-    const shuffle = (arr: any[]) => [...arr].sort(() => Math.random() - 0.5);
-
-    const maxTargets = Math.min(matchingMuscles.length, 2 + Math.floor(Math.random() * 2)); // 2 or 3
-    const selectedMatching = shuffle(matchingMuscles).slice(0, maxTargets);
-    setCorrectCountInGrid(selectedMatching.length);
-
-    const selectedNonMatching = shuffle(nonMatchingMuscles).slice(0, 6 - selectedMatching.length);
-
-    const finalGrid = shuffle([...selectedMatching, ...selectedNonMatching]);
-    setNerveGrid(finalGrid);
-    setFoundNerves([]);
-    setIsNerveLevelComplete(false);
+    const randomMuscle = MUSCLES[Math.floor(Math.random() * MUSCLES.length)];
+    setNerveMuscle(randomMuscle);
+    
+    // Get unique nerves in current language
+    const allNerves = Array.from(new Set(MUSCLES.map(m => m[language].innervatie)));
+    const correctNerve = randomMuscle[language].innervatie;
+    const distractors = allNerves.filter(n => n !== correctNerve);
+    const shuffledDistractors = distractors.sort(() => 0.5 - Math.random()).slice(0, 3);
+    const options = [...shuffledDistractors, correctNerve].sort(() => 0.5 - Math.random());
+    setNerveOptions(options);
   };
 
-  const handleNerveClick = (muscle: Muscle) => {
-    if (foundNerves.includes(muscle.id) || isNerveLevelComplete || isNerveFinished) return;
+  const handleNerveOptionClick = (optionStr: string) => {
+    if (nerveAnswered || !nerveMuscle) return;
+    
+    setNerveSelectedOption(optionStr);
+    
+    if (optionStr === nerveMuscle[language].innervatie) {
+      setNerveAnswered(true);
+      
+      const xpEarned = Math.max(0, 100 - (nerveMistakesThisRound * 25));
+      setNerveXp(prev => prev + xpEarned);
+      setNerveHistory(prev => [...prev, { nerve: { nl: nerveMuscle.nl.innervatie, en: nerveMuscle.en.innervatie }, mistakes: nerveMistakesThisRound, xp: xpEarned }]);
 
-    if (muscle[language].innervatie === targetNerve) {
-      const newFound = [...foundNerves, muscle.id];
-      setFoundNerves(newFound);
-      if (newFound.length === correctCountInGrid) {
-        setIsNerveLevelComplete(true);
-        
-        const xpEarned = Math.max(0, 100 - (nerveMistakesThisRound * 25));
-        setNerveXp(prev => prev + xpEarned);
-        setNerveHistory(prev => [...prev, { nerve: targetNerveObj!, mistakes: nerveMistakesThisRound, xp: xpEarned }]);
+      setShowSuccessAnimation(true);
 
-        if (nerveRound >= 10) {
-          setTimeout(() => { setIsNerveFinished(true); setIsNerveLevelComplete(false); }, 1200);
-        } else {
-          setTimeout(() => { setNerveRound(r => r + 1); generateNerveRound(); }, 1200);
-        }
+      if (nerveRound >= 10) {
+        setTimeout(() => { setIsNerveFinished(true); setShowSuccessAnimation(false); }, 1200);
+      } else {
+        setTimeout(() => { setNerveRound(r => r + 1); generateNerveRound(); }, 1200);
       }
     } else {
-      setShakingNerve(muscle.id);
       setNerveMistakesThisRound(m => m + 1);
-      setTimeout(() => setShakingNerve(null), 300);
     }
   };
 
@@ -760,13 +759,11 @@ export default function App() {
         logging: false,
         useCORS: true
       });
-
       canvas.toBlob(async (blob) => {
         if (!blob) {
           setIsSharing(false);
           return;
         }
-
         const file = new File([blob], `anatomy-vibe-innervatie-${nerveXp}.png`, { type: 'image/png' });
         const shareData = {
           title: 'MSK Coach Innervatie Score',
@@ -851,13 +848,11 @@ export default function App() {
     if (mov === 'dorsoflexie') {
       return /dorsoflex|retroflex|extensie heup|hip extension|extensie van de heup|extends the hip/i.test(funcText);
     }
-    if (mov === 'flexie') {
-      text = text.replace(/plantairflexie|plantarflexion|plantar flexion|dorsaalflexie|dorsiflexion|anteflexie|dorsoflexie|flexie heup|hip flexion|flexie van de heup|flexes the hip/gi, '');
-      return text.includes('flex');
+    if (mov === 'knieflexie') {
+      return /knieflexie|knee flexion|flexie knie/i.test(funcText);
     }
-    if (mov === 'extensie') {
-      text = text.replace(/extensie heup|hip extension|extensie van de heup|extends the hip/gi, '');
-      return text.includes('exten');
+    if (mov === 'knie-extensie') {
+      return /knie-extensie|knee extension|extensie knie/i.test(funcText);
     }
     if (mov === 'abductie') return text.includes('abduc');
     if (mov === 'adductie') return text.includes('adduc');
@@ -1216,83 +1211,66 @@ const handleMovementClick = (movement: string) => {
           </motion.div>
         )}
 
-        {activeTab === 'zenuwen' && targetNerve && (
+        {activeTab === 'zenuwen' && nerveMuscle && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col flex-1 min-h-0 w-full max-w-2xl mx-auto px-4"
+            className="flex flex-col flex-1 min-h-0 w-full max-w-2xl mx-auto"
           >
-            <div className="text-center mb-6 mt-4 hidden">
-              <h2 className="text-slate-400 font-medium mb-1">{t[language].supplyPower}</h2>
-              <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-cyan-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]">
-                {targetNerve}
-              </div>
-            </div>
-
-            {/* Zenuwen Top Bar */}
-            <div className="flex justify-between items-center mb-4 mt-2 bg-white/5 backdrop-blur-md rounded-2xl p-4 border border-white/10 shrink-0 relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-1 bg-white/5">
-                 <div className="h-full bg-gradient-to-r from-yellow-500 to-cyan-500 transition-all duration-300" style={{ width: `${(nerveRound / 10) * 100}%` }} />
-              </div>
-              <h2 className="text-sm sm:text-base font-bold text-slate-300 flex-1">
-                 {t[language].supplyPower}<br/>
-                 <span className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-cyan-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]">{targetNerve}</span>
-              </h2>
-              <div className="flex flex-col items-end gap-1">
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">⚡ {t[language].round} {nerveRound} / 10</div>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-500/10 text-yellow-400 rounded-full border border-yellow-500/20 shadow-[0_0_10px_rgba(250,204,21,0.1)]">
-                  <Trophy className="w-4 h-4" />
-                  <span className="font-bold text-sm">{nerveXp} XP</span>
+            <MusclePlayfield 
+              muscle={nerveMuscle} 
+              language={language} 
+              showSuccess={showSuccessAnimation} 
+              overlayTitle={`${t[language].round} ${nerveRound} / 10`}
+            >
+              {/* Controls */}
+              <div className="flex flex-col gap-4 shrink-0 pb-2 px-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                  {nerveOptions.map((optionStr) => {
+                    let btnClass = "bg-white/5 text-slate-300 border-white/10 hover:bg-white/10";
+                    
+                    if (nerveAnswered) {
+                      if (optionStr === nerveMuscle[language].innervatie) {
+                        btnClass = "bg-yellow-500/20 text-yellow-300 border-yellow-500/50 shadow-[0_0_15px_rgba(250,204,21,0.2)]";
+                      } else if (optionStr === nerveSelectedOption) {
+                        btnClass = "bg-rose-500/20 text-rose-300 border-rose-500/50";
+                      }
+                    } else if (optionStr === nerveSelectedOption) {
+                      btnClass = "bg-rose-500/20 text-rose-300 border-rose-500/50 animate-shake";
+                    }
+                    
+                    return (
+                      <button
+                        key={`nerve-${optionStr}`}
+                        onClick={() => handleNerveOptionClick(optionStr)}
+                        disabled={nerveAnswered}
+                        className={`p-4 rounded-xl border font-semibold text-sm transition-all active:scale-95 ${btnClass}`}
+                      >
+                        {optionStr}
+                      </button>
+                    )
+                  })}
+                </div>
+                {/* Action Bar */}
+                <div className="flex justify-between items-center mt-2 h-12">
+                  <button 
+                    onClick={() => {
+                      setSelectedMuscle(nerveMuscle);
+                    }}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-slate-200 hover:bg-white/10 transition-colors"
+                  >
+                    <Info className="w-5 h-5" />
+                    <span className="font-medium text-sm">{t[language].info}</span>
+                  </button>
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-500/10 text-yellow-400 rounded-full border border-yellow-500/20 shadow-[0_0_10px_rgba(250,204,21,0.1)]">
+                      <Trophy className="w-4 h-4" />
+                      <span className="font-bold text-sm">{nerveXp} XP</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 mb-2 flex-1 content-center min-h-0 overflow-y-auto scrollbar-hide">
-              {nerveGrid.map((muscle, idx) => {
-                const isFound = foundNerves.includes(muscle.id);
-                const isShaking = shakingNerve === muscle.id;
-                return (
-                  <button
-                    key={`${muscle.id}-${idx}`}
-                    onClick={() => handleNerveClick(muscle)}
-                    className={`relative p-4 rounded-2xl border transition-all duration-300 active:scale-95 flex items-center justify-center text-center min-h-[100px]
-                      ${isFound ? 'bg-yellow-400/20 text-yellow-300 border-yellow-400/50 shadow-[0_0_20px_rgba(250,204,21,0.4)] cursor-default' : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:border-white/20'}
-                      ${isShaking ? 'bg-rose-500/20 text-rose-300 border-rose-500/50 animate-shake' : ''}
-                    `}
-                  >
-                    <span className="font-semibold text-sm drop-shadow-md leading-snug">{muscle.naam}</span>
-                    {isFound && <Zap className="absolute top-2 right-2 w-4 h-4 text-yellow-400 drop-shadow-[0_0_5px_rgba(250,204,21,1)]" fill="currentColor" />}
-                  </button>
-                )
-              })}
-            </div>
-
-            <div className="mt-auto bg-white/5 border border-white/10 rounded-2xl p-4 flex justify-between items-center shrink-0">
-              <div className="text-slate-400 font-medium text-sm">{t[language].found}</div>
-              <div className="font-bold text-lg text-white">
-                <span className="text-yellow-400">{foundNerves.length}</span> / {correctCountInGrid}
-              </div>
-            </div>
-
-            <AnimatePresence>
-              {isNerveLevelComplete && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="absolute inset-0 z-10 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm rounded-3xl"
-                >
-                  <motion.div 
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className="flex flex-col items-center"
-                  >
-                    <Zap className="w-24 h-24 text-yellow-400 drop-shadow-[0_0_30px_rgba(250,204,21,1)] mb-4" fill="currentColor" />
-                    <h2 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-500 drop-shadow-lg">LEVEL COMPLETE!</h2>
-                  </motion.div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            </MusclePlayfield>
           </motion.div>
         )}
       </main>
@@ -1395,7 +1373,6 @@ const handleMovementClick = (movement: string) => {
               muscle={quizMuscle} 
               language={language} 
               showSuccess={showSuccessAnimation} 
-              overlayTitle={`${t[language].question} ${quizStreak + 1}`}
             >
               {/* Controls */}
               <div className="flex flex-col gap-4 shrink-0 pb-2 px-4">
@@ -1410,7 +1387,7 @@ const handleMovementClick = (movement: string) => {
                         btnClass = "bg-rose-500/20 text-rose-300 border-rose-500/50";
                       }
                     } else if (option === quizSelectedOption) {
-                      btnClass = "bg-cyan-500/20 text-cyan-300 border-cyan-500/50";
+                      btnClass = "bg-rose-500/20 text-rose-300 border-rose-500/50 animate-shake";
                     }
 
                     return (
