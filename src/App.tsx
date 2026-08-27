@@ -1,5 +1,5 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { MUSCLES } from './data';
+import { MUSCLES } from "./data";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { Muscle } from './types';
 import html2canvas from 'html2canvas';
 import {
@@ -152,6 +152,17 @@ const getRegionImage = (muscle: Muscle | null, side: 'voor' | 'achter') => {
   const isOnder = regio.includes('onderbeen') || regio.includes('voet') || regio.includes('enkel') || regio.includes('leg');
   return isOnder ? `regio_onder_${side}.png` : `regio_boven_${side}.png`;
 };
+const getRequiredSides = (muscle: Muscle | null): ('voor' | 'achter')[] => {
+  if (!muscle) return ['voor'];
+  const sides = new Set<'voor' | 'achter'>();
+  muscle.visualisatie.forEach(v => {
+    if (v.image.includes('voor')) sides.add('voor');
+    if (v.image.includes('achter')) sides.add('achter');
+  });
+  if (sides.size === 0) return ['voor'];
+  return Array.from(sides);
+};
+
 
 const ViewToggle = ({ side, setSide, language }: { side: 'voor'|'achter', setSide: (s: 'voor'|'achter') => void, language: Language }) => (
   <div className="flex bg-slate-900/50 p-1 rounded-xl border border-white/10 w-full max-w-[300px] mx-auto mt-2 mb-4 z-20 relative">
@@ -186,10 +197,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'bieb' | 'oefenen' | 'pinpoint' | 'zenuwen' | 'quiz'>('bieb');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMuscle, setSelectedMuscle] = useState<Muscle | null>(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);  const [viewSideBieb, setViewSideBieb] = useState<'voor' | 'achter'>('voor');
-  const [viewSideOefenen, setViewSideOefenen] = useState<'voor' | 'achter'>('voor');
-  const [viewSidePinPoint, setViewSidePinPoint] = useState<'voor' | 'achter'>('voor');
-
+  const [isMenuOpen, setIsMenuOpen] = useState(false);      
 
 
   // PWA Install State
@@ -258,8 +266,7 @@ export default function App() {
   const [quizStreak, setQuizStreak] = useState(0);
   const [quizAnswered, setQuizAnswered] = useState(false);
   const [quizSelectedOption, setQuizSelectedOption] = useState<string | null>(null);
-  const [viewSideQuiz, setViewSideQuiz] = useState<'voor' | 'achter'>('voor');
-
+  
   // Zenuwen State
   const [nerveRound, setNerveRound] = useState(1);
   const [nerveHistory, setNerveHistory] = useState<Array<{ nerve: {nl: string, en: string}, mistakes: number, xp: number }>>([]);
@@ -283,24 +290,6 @@ export default function App() {
   const [shakeMovement, setShakeMovement] = useState<string | null>(null);
   const [isSharing, setIsSharing] = useState(false);
   const flexCardRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (selectedMuscle) {
-      setViewSideBieb(selectedMuscle.visualisatie[0]?.image.includes('achter') ? 'achter' : 'voor');
-    }
-  }, [selectedMuscle]);
-
-  useEffect(() => {
-    if (currentPracticeMuscle) {
-      setViewSideOefenen(currentPracticeMuscle.visualisatie[0]?.image.includes('achter') ? 'achter' : 'voor');
-    }
-  }, [currentPracticeMuscle]);
-
-  useEffect(() => {
-    if (pinPointMuscle) {
-      setViewSidePinPoint(pinPointMuscle.visualisatie[0]?.image.includes('achter') ? 'achter' : 'voor');
-    }
-  }, [pinPointMuscle]);
 
   const getStreakTitle = (s: number) => {
     if (s <= 5) return 'Stagiair';
@@ -387,17 +376,15 @@ export default function App() {
     setPinPointFeedback(null);
   };
 
-  const handlePinPointClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const [pinPointSide, setPinPointSide] = React.useState<'voor' | 'achter'>('voor');
+  const handlePinPointClick = (e: React.MouseEvent<HTMLDivElement>, x: number, y: number, side: 'voor' | 'achter') => {
     if (pinPointClick || !pinPointMuscle) return; // already clicked
 
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    
     setPinPointClick({ x, y });
+    setPinPointSide(side);
 
     // Find all valid targets on the current side
-    const validTargets = pinPointMuscle.visualisatie.filter(p => p.type === pinPointTarget && p.image.includes(viewSidePinPoint));
+    const validTargets = pinPointMuscle.visualisatie.filter(p => p.type === pinPointTarget && p.image.includes(side));
     
     let minDistance = Infinity;
     
@@ -420,6 +407,7 @@ export default function App() {
     setPinPointXp(prev => prev + xp);
     setPinPointFeedback({ distance: minDistance, xp, message });
     setPinPointHistory(prev => [...prev, { naam: pinPointMuscle.naam, target: pinPointTarget, distance: minDistance, xp }]);
+    setTimeout(() => { handlePinPointNext(); }, 1200);
   };
 
   const handlePinPointNext = () => {
@@ -503,11 +491,6 @@ export default function App() {
 
   
   // Quiz Logic
-  useEffect(() => {
-    if (quizMuscle) {
-      setViewSideQuiz(quizMuscle.visualisatie[0]?.image.includes('achter') ? 'achter' : 'voor');
-    }
-  }, [quizMuscle]);
 
   useEffect(() => {
     if (activeTab === 'quiz' && !quizMuscle) {
@@ -538,10 +521,7 @@ export default function App() {
     if (optionName === quizMuscle.naam) {
       setQuizStreak(s => s + 1);
       setShowSuccessAnimation(true);
-      setTimeout(() => {
-        setShowSuccessAnimation(false);
-        startNewQuizRound();
-      }, 1500);
+      setTimeout(() => { setShowSuccessAnimation(false); startNewQuizRound(); }, 1200);
     } else {
       setQuizStreak(0);
     }
@@ -602,15 +582,9 @@ export default function App() {
         setNerveHistory(prev => [...prev, { nerve: targetNerveObj!, mistakes: nerveMistakesThisRound, xp: xpEarned }]);
 
         if (nerveRound >= 10) {
-          setTimeout(() => {
-            setIsNerveFinished(true);
-            setIsNerveLevelComplete(false);
-          }, 1500);
+          setTimeout(() => { setIsNerveFinished(true); setIsNerveLevelComplete(false); }, 1200);
         } else {
-          setTimeout(() => {
-            setNerveRound(r => r + 1);
-            generateNerveRound();
-          }, 1500);
+          setTimeout(() => { setNerveRound(r => r + 1); generateNerveRound(); }, 1200);
         }
       }
     } else {
@@ -788,7 +762,7 @@ const handleMovementClick = (movement: string) => {
   useEffect(() => {
     if (isMuscleComplete) {
       setShowSuccessAnimation(true);
-      const t = setTimeout(() => setShowSuccessAnimation(false), 1000);
+      const t = setTimeout(() => { setShowSuccessAnimation(false); handleNextMuscle(); }, 1200);
       return () => clearTimeout(t);
     }
   }, [isMuscleComplete]);
@@ -800,11 +774,11 @@ const handleMovementClick = (movement: string) => {
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-fuchsia-600/20 rounded-full blur-[100px] pointer-events-none" />
 
       {/* Header */}
-      <header className="flex items-center justify-between p-4 bg-white/5 backdrop-blur-md border-b border-white/10 z-10">
+      <header className="flex items-center justify-between p-2 bg-white/5 backdrop-blur-md border-b border-white/10 z-10">
         <button onClick={() => setIsMenuOpen(true)} className="p-2 rounded-full hover:bg-white/10 transition-colors">
           <Menu className="w-6 h-6 text-cyan-400" />
         </button>
-        <h1 className="text-xl font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-400">
+        <h1 className="text-base font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-400">
           MSK COACH
         </h1>
         <div className="w-10" /> {/* Spacer for centering */}
@@ -984,24 +958,10 @@ const handleMovementClick = (movement: string) => {
             className="flex flex-col flex-1 min-h-0 w-full max-w-2xl mx-auto"
           >
             {/* Oefenen Top Bar */}
-            <div className="flex justify-between items-center mb-4 bg-white/5 backdrop-blur-md rounded-2xl p-4 border border-white/10 shrink-0">
-              <h2 className="text-lg sm:text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-100 to-slate-400">
+            <div className="flex justify-between items-center mb-2 bg-white/5 backdrop-blur-md rounded-xl p-2 px-3 border border-white/10 shrink-0">
+              <h2 className="text-base font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-100 to-slate-400">
                 {currentPracticeMuscle.naam}
               </h2>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-500/10 text-rose-400 rounded-full border border-rose-500/20 shadow-[0_0_10px_rgba(244,63,94,0.1)]">
-                  <Flame className="w-4 h-4" />
-                  <span className="font-bold text-sm">{streak}</span>
-                </div>
-                <button
-                  onClick={handleShareScore}
-                  disabled={isSharing}
-                  className="flex items-center justify-center p-2 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500/20 transition-colors disabled:opacity-50"
-                  title={t[language].shareScore}
-                >
-                  {isSharing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Share2 className="w-4 h-4" />}
-                </button>
-              </div>
             </div>
 
             {/* Playfield */}
@@ -1024,18 +984,16 @@ const handleMovementClick = (movement: string) => {
                   </motion.div>
                 )}
               </AnimatePresence>
-                            <div className="w-full flex flex-col items-center absolute top-2 left-0 right-0 z-20 pointer-events-auto">
-                <ViewToggle side={viewSideOefenen} setSide={setViewSideOefenen} language={language} />
-              </div>
+                            
               <div className="flex w-full h-full items-center justify-center pt-8 overflow-hidden min-h-0 shrink">
                 <div className="relative inline-block min-h-0 shrink">
                   <img 
-                    src={getRegionImage(currentPracticeMuscle, viewSideOefenen)} 
+                    src={getRegionImage(currentPracticeMuscle, "voor")} 
                     alt="Skelet" 
                     className="block pointer-events-none opacity-80 mix-blend-screen max-h-[42vh] sm:max-h-[55vh] w-auto object-contain shrink"
                     onError={(e) => { e.currentTarget.src = "https://placehold.co/400x800/1e293b/334155?text=Skelet"; }}
                   />
-                  {currentPracticeMuscle && currentPracticeMuscle.visualisatie.some(p => p.image.includes(viewSideOefenen)) && (
+                  {currentPracticeMuscle && currentPracticeMuscle.visualisatie.some(p => p.image.includes("voor")) && (
                     <>
                   <svg className="absolute inset-0 w-full h-full pointer-events-none">
                     <defs>
@@ -1051,8 +1009,8 @@ const handleMovementClick = (movement: string) => {
                         </feMerge>
                       </filter>
                     </defs>
-                    {currentPracticeMuscle.visualisatie.filter(p => p.image.includes(viewSideOefenen) && p.type === 'origo').map((origo, oIdx) => (
-                      currentPracticeMuscle.visualisatie.filter(p => p.image.includes(viewSideOefenen) && p.type === 'insertie').map((insertie, iIdx) => (
+                    {currentPracticeMuscle.visualisatie.filter(p => p.image.includes("voor") && p.type === 'origo').map((origo, oIdx) => (
+                      currentPracticeMuscle.visualisatie.filter(p => p.image.includes("voor") && p.type === 'insertie').map((insertie, iIdx) => (
                         <line 
                           key={`line-${oIdx}-${iIdx}`}
                           x1={origo.x} 
@@ -1069,7 +1027,7 @@ const handleMovementClick = (movement: string) => {
                     ))}
                   </svg>
                   {/* Dots */}
-                  {currentPracticeMuscle.visualisatie.filter(p => p.image.includes(viewSideOefenen)).map((point, idx) => (
+                  {currentPracticeMuscle.visualisatie.filter(p => p.image.includes("voor")).map((point, idx) => (
                     <div 
                       key={`dot-${idx}`}
                       className={`absolute w-4 h-4 rounded-full border-2 border-slate-900 -translate-x-1/2 -translate-y-1/2 z-10 ${point.type === 'origo' ? 'bg-fuchsia-400 shadow-[0_0_15px_rgba(232,121,249,0.8)]' : 'bg-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.8)]'}`}
@@ -1120,20 +1078,19 @@ const handleMovementClick = (movement: string) => {
                   <Info className="w-5 h-5" />
                   <span className="font-medium text-sm">{t[language].info}</span>
                 </button>
-                
-                <AnimatePresence>
-                  {isMuscleComplete && (
-                    <motion.button
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.9 }}
-                      onClick={handleNextMuscle}
-                      className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-cyan-400 text-slate-950 font-bold hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all flex items-center gap-2"
-                    >
-                      Volgende Spier <ChevronRight className="w-5 h-5" />
-                    </motion.button>
-                  )}
-                </AnimatePresence>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-500/10 text-rose-400 rounded-full border border-rose-500/20 shadow-[0_0_10px_rgba(244,63,94,0.1)]">
+                    <Flame className="w-4 h-4" />
+                    <span className="font-bold text-sm">{streak} / {MUSCLES.length}</span>
+                  </div>
+                  <button
+                    onClick={handleShareScore}
+                    disabled={isSharing}
+                    className="flex items-center justify-center p-2 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500/20 transition-colors disabled:opacity-50"
+                  >
+                    {isSharing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Share2 className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
             </div>
           </motion.div>
@@ -1165,25 +1122,23 @@ const handleMovementClick = (movement: string) => {
 
             {/* Pin-Point Playfield */}
             <div className="relative flex-1 min-h-0 mb-4 bg-slate-900/60 rounded-3xl border border-white/10 overflow-hidden shadow-[inset_0_0_50px_rgba(0,0,0,0.5)] flex items-center justify-center p-2 sm:p-4">
-              <div className="w-full flex flex-col items-center absolute top-2 left-0 right-0 z-20 pointer-events-auto">
-                <ViewToggle side={viewSidePinPoint} setSide={setViewSidePinPoint} language={language} />
-              </div>
+              
               <div className="flex w-full h-full items-center justify-center pt-8 overflow-hidden relative min-h-0 shrink">
                 <div 
                   className="relative inline-block cursor-crosshair min-h-0 shrink"
                   onClick={handlePinPointClick}
                 >
                   <img 
-                    src={getRegionImage(pinPointMuscle, viewSidePinPoint)} 
+                    src={getRegionImage(pinPointMuscle, "voor")} 
                     alt="Skelet" 
                     className="block pointer-events-none opacity-80 mix-blend-screen max-h-[42vh] sm:max-h-[55vh] w-auto object-contain shrink"
                     onError={(e) => { e.currentTarget.src = "https://placehold.co/400x800/1e293b/334155?text=Skelet"; }}
                   />
                   {pinPointClick && pinPointFeedback && (
                     <>
-                      {pinPointMuscle.visualisatie.some(p => p.image.includes(viewSidePinPoint)) && (
+                      {pinPointMuscle.visualisatie.some(p => p.image.includes(pinPointSide)) && (
                         <svg className="absolute inset-0 w-full h-full pointer-events-none">
-                          {pinPointMuscle.visualisatie.filter(p => p.type === pinPointTarget && p.image.includes(viewSidePinPoint)).map((target, idx) => (
+                          {pinPointMuscle.visualisatie.filter(p => p.type === pinPointTarget && p.image.includes(pinPointSide)).map((target, idx) => (
                             <line 
                               key={`pp-line-${idx}`}
                               x1={`${pinPointClick.x}%`} 
@@ -1203,7 +1158,7 @@ const handleMovementClick = (movement: string) => {
                         style={{ left: `${pinPointClick.x}%`, top: `${pinPointClick.y}%` }}
                       />
                       {/* Actual Target Dots */}
-                      {pinPointMuscle.visualisatie.filter(p => p.type === pinPointTarget && p.image.includes(viewSidePinPoint)).map((target, idx) => (
+                      {pinPointMuscle.visualisatie.filter(p => p.type === pinPointTarget && p.image.includes(pinPointSide)).map((target, idx) => (
                         <div 
                           key={`pp-target-${idx}`}
                           className={`absolute w-4 h-4 rounded-full border-2 border-slate-900 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none ${pinPointTarget === 'origo' ? 'bg-fuchsia-400 shadow-[0_0_15px_rgba(232,121,249,0.8)]' : 'bg-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.8)]'}`}
@@ -1238,12 +1193,7 @@ const handleMovementClick = (movement: string) => {
                   <p className="text-slate-400 text-sm mb-4">
                     {t[language].distanceText} {pinPointFeedback.distance.toFixed(1)}{t[language].distanceOff}
                   </p>
-                  <button
-                    onClick={handlePinPointNext}
-                    className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-cyan-400 text-slate-950 font-bold hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all flex items-center justify-center gap-2"
-                  >
-                    {pinPointRound >= 10 ? 'Bekijk Resultaten' : 'Volgende Spier'} <ChevronRight className="w-5 h-5" />
-                  </button>
+                  
                 </motion.div>
               )}
             </AnimatePresence>
@@ -1400,18 +1350,15 @@ const handleMovementClick = (movement: string) => {
 
               {/* Added Visualizer to Bieb */}
               <div className="flex justify-center bg-slate-950/50 rounded-2xl border border-white/5 py-4 mb-6">
-                <div className="w-full flex flex-col items-center">
-                  <ViewToggle side={viewSideBieb} setSide={setViewSideBieb} language={language} />
-                  
-                  <div className="flex w-full items-center justify-center overflow-hidden min-h-0 shrink">
+                <div className="w-full flex flex-col items-center"><div className="flex w-full items-center justify-center overflow-hidden min-h-0 shrink">
                     <div className="relative inline-block mt-2 min-h-0 shrink">
                       <img 
-                        src={getRegionImage(selectedMuscle, viewSideBieb)} 
+                        src={getRegionImage(selectedMuscle, "voor")} 
                         alt="Skelet" 
                         className="block pointer-events-none opacity-80 mix-blend-screen max-h-[42vh] sm:max-h-[55vh] w-auto object-contain shrink"
                         onError={(e) => { e.currentTarget.src = "https://placehold.co/400x800/1e293b/334155?text=Skelet"; }}
                       />
-                      {selectedMuscle && selectedMuscle.visualisatie.some(p => p.image.includes(viewSideBieb)) && (
+                      {selectedMuscle && selectedMuscle.visualisatie.some(p => p.image.includes("voor")) && (
                         <>
                   <svg className="absolute inset-0 w-full h-full pointer-events-none">
                     <defs>
@@ -1427,8 +1374,8 @@ const handleMovementClick = (movement: string) => {
                         </feMerge>
                       </filter>
                     </defs>
-                    {selectedMuscle.visualisatie.filter(p => p.image.includes(viewSideBieb) && p.type === 'origo').map((origo, oIdx) => (
-                      selectedMuscle.visualisatie.filter(p => p.image.includes(viewSideBieb) && p.type === 'insertie').map((insertie, iIdx) => (
+                    {selectedMuscle.visualisatie.filter(p => p.image.includes("voor") && p.type === 'origo').map((origo, oIdx) => (
+                      selectedMuscle.visualisatie.filter(p => p.image.includes("voor") && p.type === 'insertie').map((insertie, iIdx) => (
                         <line 
                           key={`line-${oIdx}-${iIdx}`}
                           x1={origo.x} 
@@ -1445,7 +1392,7 @@ const handleMovementClick = (movement: string) => {
                     ))}
                   </svg>
                   {/* Dots */}
-                  {selectedMuscle.visualisatie.filter(p => p.image.includes(viewSideBieb)).map((point, idx) => (
+                  {selectedMuscle.visualisatie.filter(p => p.image.includes("voor")).map((point, idx) => (
                     <div 
                       key={`dot-${idx}`}
                       className={`absolute w-4 h-4 rounded-full border-2 border-slate-900 -translate-x-1/2 -translate-y-1/2 z-10 ${point.type === 'origo' ? 'bg-fuchsia-400 shadow-[0_0_15px_rgba(232,121,249,0.8)]' : 'bg-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.8)]'}`}
@@ -1517,18 +1464,16 @@ const handleMovementClick = (movement: string) => {
                 )}
               </AnimatePresence>
               
-              <div className="w-full flex flex-col items-center absolute top-2 left-0 right-0 z-20 pointer-events-auto">
-                <ViewToggle side={viewSideQuiz} setSide={setViewSideQuiz} language={language} />
-              </div>
+              
               <div className="flex w-full h-full items-center justify-center pt-8 overflow-hidden min-h-0 shrink">
                 <div className="relative inline-block min-h-0 shrink">
                   <img 
-                    src={getRegionImage(quizMuscle, viewSideQuiz)} 
+                    src={getRegionImage(quizMuscle, "voor")} 
                     alt="Skelet" 
                     className="block pointer-events-none opacity-80 mix-blend-screen max-h-[42vh] sm:max-h-[55vh] w-auto object-contain shrink"
                     onError={(e) => { e.currentTarget.src = "https://placehold.co/400x800/1e293b/334155?text=Skelet"; }}
                   />
-                  {quizMuscle && quizMuscle.visualisatie.some(p => p.image.includes(viewSideQuiz)) && (
+                  {quizMuscle && quizMuscle.visualisatie.some(p => p.image.includes("voor")) && (
                     <>
                   <svg className="absolute inset-0 w-full h-full pointer-events-none">
                     <defs>
@@ -1544,8 +1489,8 @@ const handleMovementClick = (movement: string) => {
                         </feMerge>
                       </filter>
                     </defs>
-                    {quizMuscle.visualisatie.filter(p => p.image.includes(viewSideQuiz) && p.type === 'origo').map((origo, oIdx) => (
-                      quizMuscle.visualisatie.filter(p => p.image.includes(viewSideQuiz) && p.type === 'insertie').map((insertie, iIdx) => (
+                    {quizMuscle.visualisatie.filter(p => p.image.includes("voor") && p.type === 'origo').map((origo, oIdx) => (
+                      quizMuscle.visualisatie.filter(p => p.image.includes("voor") && p.type === 'insertie').map((insertie, iIdx) => (
                         <line 
                           key={`line-${oIdx}-${iIdx}`}
                           x1={origo.x} 
@@ -1562,7 +1507,7 @@ const handleMovementClick = (movement: string) => {
                     ))}
                   </svg>
                   {/* Dots */}
-                  {quizMuscle.visualisatie.filter(p => p.image.includes(viewSideQuiz)).map((point, idx) => (
+                  {quizMuscle.visualisatie.filter(p => p.image.includes("voor")).map((point, idx) => (
                     <div 
                       key={`dot-${idx}`}
                       className={`absolute w-4 h-4 rounded-full border-2 border-slate-900 -translate-x-1/2 -translate-y-1/2 z-10 ${point.type === 'origo' ? 'bg-fuchsia-400 shadow-[0_0_15px_rgba(232,121,249,0.8)]' : 'bg-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.8)]'}`}

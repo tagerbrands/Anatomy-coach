@@ -41,7 +41,7 @@ export const MUSCLES: Muscle[] = [
       "origo": "Spina iliaca anterior inferior (SIAI)",
       "insertie": "Tuberositas tibiae (via lig. patellae)",
       "innervatie": "N. femoralis",
-      "functie": "Anteflexie heup, Extensie knie"
+      "functie": "Anteflexie heup, Knie-extensie"
     },
     "en": {
       "regio": "THIGH (Anterior)",
@@ -105,7 +105,7 @@ export const MUSCLES: Muscle[] = [
       "origo": "Spina iliaca anterior superior (SIAS)",
       "insertie": "Facies medialis tibiae (pes anserinus)",
       "innervatie": "N. femoralis",
-      "functie": "Anteflexie heup, Abductie heup, Exorotatie heup, Flexie knie, Endorotatie knie"
+      "functie": "Anteflexie heup, Abductie heup, Exorotatie heup, Knieflexie, Endorotatie knie"
     },
     "en": {
       "regio": "THIGH (Anterior)",
@@ -265,7 +265,7 @@ export const MUSCLES: Muscle[] = [
       "origo": "Ramus inferior ossis pubis",
       "insertie": "Facies medialis tibiae (pes anserinus)",
       "innervatie": "N. obturatorius",
-      "functie": "Adductie heup, Flexie knie, Endorotatie knie"
+      "functie": "Adductie heup, Knieflexie, Endorotatie knie"
     },
     "en": {
       "regio": "THIGH (Medial)",
@@ -425,7 +425,7 @@ export const MUSCLES: Muscle[] = [
       "origo": "Tuber ischiadicum (caput longum), Linea aspera (caput breve)",
       "insertie": "Caput fibulae",
       "innervatie": "N. ischiadicus",
-      "functie": "Flexie knie, Exorotatie knie, Dorsoflexie heup"
+      "functie": "Knieflexie, Exorotatie knie, Dorsoflexie heup"
     },
     "en": {
       "regio": "THIGH (Posterior)",
@@ -457,7 +457,7 @@ export const MUSCLES: Muscle[] = [
       "origo": "Tuber ischiadicum",
       "insertie": "Facies medialis tibiae (pes anserinus)",
       "innervatie": "N. ischiadicus",
-      "functie": "Flexie knie, Endorotatie knie, Dorsoflexie heup"
+      "functie": "Knieflexie, Endorotatie knie, Dorsoflexie heup"
     },
     "en": {
       "regio": "THIGH (Posterior)",
@@ -489,7 +489,7 @@ export const MUSCLES: Muscle[] = [
       "origo": "Tuber ischiadicum",
       "insertie": "Condylus medialis tibiae",
       "innervatie": "N. ischiadicus",
-      "functie": "Flexie knie, Endorotatie knie, Dorsoflexie heup"
+      "functie": "Knieflexie, Endorotatie knie, Dorsoflexie heup"
     },
     "en": {
       "regio": "THIGH (Posterior)",
@@ -527,7 +527,7 @@ export const MUSCLES: Muscle[] = [
       "origo": "Bekken en femur (4 koppen)",
       "insertie": "Tuberositas tibiae",
       "innervatie": "N. femoralis",
-      "functie": "Extensie knie"
+      "functie": "Knie-extensie"
     },
     "en": {
       "regio": "THIGH (Anterior)",
@@ -559,7 +559,7 @@ export const MUSCLES: Muscle[] = [
       "origo": "Linea aspera, trochanter major",
       "insertie": "Tuberositas tibiae",
       "innervatie": "N. femoralis",
-      "functie": "Extensie knie"
+      "functie": "Knie-extensie"
     },
     "en": {
       "regio": "THIGH (Anterior)",
@@ -591,7 +591,7 @@ export const MUSCLES: Muscle[] = [
       "origo": "Linea aspera, linea intertrochanterica",
       "insertie": "Tuberositas tibiae",
       "innervatie": "N. femoralis",
-      "functie": "Extensie knie"
+      "functie": "Knie-extensie"
     },
     "en": {
       "regio": "THIGH (Anterior)",
@@ -629,7 +629,7 @@ export const MUSCLES: Muscle[] = [
       "origo": "Corpus femoris (anterieur/lateraal)",
       "insertie": "Tuberositas tibiae",
       "innervatie": "N. femoralis",
-      "functie": "Extensie knie"
+      "functie": "Knie-extensie"
     },
     "en": {
       "regio": "THIGH (Anterior)",
@@ -661,7 +661,7 @@ export const MUSCLES: Muscle[] = [
       "origo": "Condylus medialis en lateralis femoris",
       "insertie": "Tuber calcanei (achillespees)",
       "innervatie": "N. tibialis",
-      "functie": "Plantairflexie enkel, Flexie knie"
+      "functie": "Plantairflexie enkel, Knieflexie"
     },
     "en": {
       "regio": "LEG (Posterior)",

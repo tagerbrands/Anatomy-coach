@@ -1,0 +1,1030 @@
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { MUSCLES } from './data';
+import { Muscle } from './types';
+import html2canvas from 'html2canvas';
+import {
+  Menu,
+  Library,
+  Search,
+  Filter,
+  MapPin,
+  Target,
+  Zap,
+  Activity,
+  X,
+  ChevronRight,
+  ChevronLeft,
+  Info,
+  Flame,
+  Share2,
+  Share,
+  HelpCircle,
+  Download,
+  Loader2,
+  Crosshair,
+  Trophy,
+  RotateCcw,
+  BicepsFlexed
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+
+const MOVEMENTS = [
+  'Flexie', 'Extensie', 'Anteflexie', 'Dorsoflexie', 'Abductie', 'Adductie',
+  'Endorotatie', 'Exorotatie', 'Plantairflexie', 'Dorsaalflexie',
+  'Inversie', 'Eversie'
+];
+
+
+export type Language = 'nl' | 'en';
+
+export const t = {
+  nl: {
+    library: "Bieb",
+    practice: "Functies",
+    pinpoint: "Locatie",
+    nerves: "Innervatie",
+    quiz: "Quiz",
+    nextQuestion: "Volgende Vraag",
+    searchPlaceholder: "Zoek een spier...",
+    noMuscles: "Geen spieren gevonden voor deze zoekopdracht.",
+    origo: "Origo",
+    insertion: "Insertie",
+    innervation: "Innervatie",
+    function: "Functie",
+    info: "Info",
+    nextMuscle: "Volgende Spier",
+    shareScore: "Deel Score",
+    sessionComplete: "Sessie Voltooid!",
+    pointTo: "Wijs de",
+    ofThe: "aan van de",
+    round: "Ronde",
+    results: "Bekijk Resultaten",
+    supplyPower: "Voorzie de spieren van stroom:",
+    found: "Gevonden",
+    bestNerve: "Beste Zenuw",
+    worstNerve: "Slechtste Zenuw",
+    playAgain: "Speel Nog Een Ronde",
+    totalScore: "Totale Score",
+    highlights: "Hoogtepunten",
+    resetProgress: "Reset Progressie",
+    aboutTitle: "Over MSK coach",
+    aboutText: "Dé tool om klinisch redeneren en anatomie te masteren.",
+    author: "Auteur:",
+    mistakes: "fouten",
+    miss: "Mis!",
+    bullseye: "Bullseye!",
+    great: "Geweldig!",
+    close: "In de buurt!",
+    distanceText: "Je was er",
+    distanceOff: "% naast.",
+    shareTextPinPoint: "Ik heb {xp} XP behaald als {rank}! #MSKCOACH",
+    shareTextNerve: "Ik heb {xp} XP behaald als {rank}! #MSKCOACH",
+    shareTextStreak: "Can you beat my streak of {streak} ({rank})? #MSKCOACH",
+    correct: "Correct",
+    installApp: "Installeer App",
+    iosInstallTitle: "Offline leren?",
+    iosInstallBody: "Tik op het Deel-icoon onderin je scherm en kies 'Zet op beginscherm'.",
+    closeBtn: "Sluit",
+    movements: {
+      'Flexie': 'Flexie', 'Extensie': 'Extensie', 'Anteflexie': 'Anteflexie', 'Dorsoflexie': 'Dorsoflexie', 'Abductie': 'Abductie', 'Adductie': 'Adductie',
+      'Endorotatie': 'Endorotatie', 'Exorotatie': 'Exorotatie', 'Plantairflexie': 'Plantairflexie',
+      'Dorsaalflexie': 'Dorsaalflexie', 'Inversie': 'Inversie', 'Eversie': 'Eversie'
+    }
+  },
+  en: {
+    library: "Library",
+    practice: "Functions",
+    pinpoint: "Location",
+    nerves: "Innervation",
+    searchPlaceholder: "Search for a muscle...",
+    noMuscles: "No muscles found for this search.",
+    origo: "Origin",
+    insertion: "Insertion",
+    innervation: "Innervation",
+    function: "Action",
+    info: "Info",
+    nextMuscle: "Next Muscle",
+    shareScore: "Share Score",
+    sessionComplete: "Session Complete!",
+    pointTo: "Point to the",
+    ofThe: "of the",
+    round: "Round",
+    results: "View Results",
+    supplyPower: "Supply power to the muscles:",
+    found: "Found",
+    bestNerve: "Best Nerve",
+    worstNerve: "Worst Nerve",
+    playAgain: "Play Another Round",
+    totalScore: "Total Score",
+    highlights: "Highlights",
+    resetProgress: "Reset Progress",
+    aboutTitle: "About MSK coach",
+    aboutText: "The ultimate tool to master clinical reasoning and anatomy.",
+    author: "Author:",
+    mistakes: "mistakes",
+    miss: "Miss!",
+    bullseye: "Bullseye!",
+    great: "Great!",
+    close: "Close!",
+    distanceText: "You were",
+    distanceOff: "% off.",
+    shareTextPinPoint: "I earned {xp} XP as a {rank}! #MSKCOACH",
+    shareTextNerve: "I earned {xp} XP as a {rank}! #MSKCOACH",
+    shareTextStreak: "Can you beat my streak of {streak} ({rank})? #MSKCOACH",
+    correct: "Correct",
+    nextQuestion: "Next Question",
+    installApp: "Install App",
+    iosInstallTitle: "Learn offline?",
+    iosInstallBody: "Tap the Share icon below and choose 'Add to Home Screen'.",
+    closeBtn: "Close",
+    movements: {
+      'Flexie': 'Flexion', 'Extensie': 'Extension', 'Anteflexie': 'Anteflexion', 'Dorsoflexie': 'Dorsoflexion', 'Abductie': 'Abduction', 'Adductie': 'Adduction',
+      'Endorotatie': 'Internal Rotation', 'Exorotatie': 'External Rotation', 'Plantairflexie': 'Plantar Flexion',
+      'Dorsaalflexie': 'Dorsiflexion', 'Inversie': 'Inversion', 'Eversie': 'Eversion'
+    }
+  }
+};
+
+
+const getRegionImage = (muscle: Muscle | null, side: 'voor' | 'achter') => {
+  if (!muscle || !muscle.visualisatie) return `regio_boven_${side}.png`;
+  const regio = muscle.nl.regio.toLowerCase();
+  const isOnder = regio.includes('onderbeen') || regio.includes('voet') || regio.includes('enkel') || regio.includes('leg');
+  return isOnder ? `regio_onder_${side}.png` : `regio_boven_${side}.png`;
+};
+const getRequiredSides = (muscle: Muscle | null): ('voor' | 'achter')[] => {
+  if (!muscle) return ['voor'];
+  const sides = new Set<'voor' | 'achter'>();
+  muscle.visualisatie.forEach(v => {
+    if (v.image.includes('voor')) sides.add('voor');
+    if (v.image.includes('achter')) sides.add('achter');
+  });
+  if (sides.size === 0) return ['voor'];
+  return Array.from(sides);
+};
+
+
+const ViewToggle = ({ side, setSide, language }: { side: 'voor'|'achter', setSide: (s: 'voor'|'achter') => void, language: Language }) => (
+  <div className="flex bg-slate-900/50 p-1 rounded-xl border border-white/10 w-full max-w-[300px] mx-auto mt-2 mb-4 z-20 relative">
+    <button
+      onClick={(e) => { e.stopPropagation(); setSide('voor'); }}
+      className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-2 ${
+        side === 'voor' ? 'bg-cyan-500/20 text-cyan-300 shadow-[0_0_10px_rgba(6,182,212,0.2)]' : 'text-slate-400 hover:text-slate-200'
+      }`}
+    >
+      👁️ {language === 'nl' ? 'Vooraanzicht' : 'Anterior'}
+    </button>
+    <button
+      onClick={(e) => { e.stopPropagation(); setSide('achter'); }}
+      className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-2 ${
+        side === 'achter' ? 'bg-cyan-500/20 text-cyan-300 shadow-[0_0_10px_rgba(6,182,212,0.2)]' : 'text-slate-400 hover:text-slate-200'
+      }`}
+    >
+      🔄 {language === 'nl' ? 'Achteraanzicht' : 'Posterior'}
+    </button>
+  </div>
+);
+
+export default function App() {
+  const [language, setLanguage] = useState<Language>(() => {
+    return (localStorage.getItem('language') as Language) || 'nl';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('language', language);
+  }, [language]);
+
+  const [activeTab, setActiveTab] = useState<'bieb' | 'oefenen' | 'pinpoint' | 'zenuwen' | 'quiz'>('bieb');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedMuscle, setSelectedMuscle] = useState<Muscle | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);      
+
+
+  // PWA Install State
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isStandalone, setIsStandalone] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+  const [showIOSModal, setShowIOSModal] = useState(false);
+
+  useEffect(() => {
+    const checkStandalone = () => {
+      const isStandAloneMatch = window.matchMedia('(display-mode: standalone)').matches;
+      const isIOSStandAlone = (window.navigator as any).standalone === true;
+      setIsStandalone(isStandAloneMatch || isIOSStandAlone);
+    };
+    checkStandalone();
+
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    const isIOSDevice = /iphone|ipad|ipod/.test(userAgent) || (userAgent.includes("mac") && "ontouchend" in document);
+    setIsIOS(isIOSDevice);
+
+    const handleBeforeInstallPrompt = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (isIOS) {
+      setShowIOSModal(true);
+      setIsMenuOpen(false);
+    } else if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setDeferredPrompt(null);
+      }
+    } else {
+      if (/android/.test(window.navigator.userAgent.toLowerCase())) {
+        // do nothing
+      } else {
+        setShowIOSModal(true);
+        setIsMenuOpen(false);
+      }
+    }
+  };
+
+  // Pin-Point State
+  const [pinPointRound, setPinPointRound] = useState(1);
+  const [pinPointHistory, setPinPointHistory] = useState<Array<{ naam: string, target: string, distance: number, xp: number }>>([]);
+  const [isPinPointFinished, setIsPinPointFinished] = useState(false);
+  const [pinPointShareFile, setPinPointShareFile] = useState<File | null>(null);
+  const [pinPointXp, setPinPointXp] = useState(0);
+  const [pinPointMuscle, setPinPointMuscle] = useState<Muscle | null>(null);
+  const [pinPointTarget, setPinPointTarget] = useState<'origo' | 'insertie'>('origo');
+  const [pinPointClick, setPinPointClick] = useState<{ x: number; y: number } | null>(null);
+  const [pinPointFeedback, setPinPointFeedback] = useState<{ distance: number; xp: number; message: string } | null>(null);
+  const pinPointFlexCardRef = useRef<HTMLDivElement>(null);
+
+  
+  // Quiz State
+  const [quizMuscle, setQuizMuscle] = useState<Muscle | null>(null);
+  const [quizOptions, setQuizOptions] = useState<string[]>([]);
+  const [quizStreak, setQuizStreak] = useState(0);
+  const [quizAnswered, setQuizAnswered] = useState(false);
+  const [quizSelectedOption, setQuizSelectedOption] = useState<string | null>(null);
+  
+  // Zenuwen State
+  const [nerveRound, setNerveRound] = useState(1);
+  const [nerveHistory, setNerveHistory] = useState<Array<{ nerve: {nl: string, en: string}, mistakes: number, xp: number }>>([]);
+  const [isNerveFinished, setIsNerveFinished] = useState(false);
+  const [nerveXp, setNerveXp] = useState(0);
+  const [nerveMistakesThisRound, setNerveMistakesThisRound] = useState(0);
+  const [targetNerveObj, setTargetNerveObj] = useState<{nl: string, en: string} | null>(null);
+  const targetNerve = targetNerveObj ? targetNerveObj[language] : '';
+  const [nerveGrid, setNerveGrid] = useState<Muscle[]>([]);
+  const [correctCountInGrid, setCorrectCountInGrid] = useState(0);
+  const [foundNerves, setFoundNerves] = useState<string[]>([]);
+  const [shakingNerve, setShakingNerve] = useState<string | null>(null);
+  const [isNerveLevelComplete, setIsNerveLevelComplete] = useState(false);
+  const nerveFlexCardRef = useRef<HTMLDivElement>(null);
+
+  // Oefenen State
+  const [currentPracticeMuscle, setCurrentPracticeMuscle] = useState<Muscle | null>(null);
+  const [practiceOptions, setPracticeOptions] = useState<string[]>([]);
+  const [streak, setStreak] = useState(0);
+  const [guessedMovements, setGuessedMovements] = useState<Record<string, 'correct' | 'incorrect'>>({});
+  const [shakeMovement, setShakeMovement] = useState<string | null>(null);
+  const [isSharing, setIsSharing] = useState(false);
+  const flexCardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (selectedMuscle) {
+      setViewSideBieb(selectedMuscle.visualisatie[0]?.image.includes('achter') ? 'achter' : 'voor');
+    }
+  }, [selectedMuscle]);
+
+  useEffect(() => {
+    if (currentPracticeMuscle) {
+      setViewSideOefenen(currentPracticeMuscle.visualisatie[0]?.image.includes('achter') ? 'achter' : 'voor');
+    }
+  }, [currentPracticeMuscle]);
+
+  useEffect(() => {
+    if (pinPointMuscle) {
+      setViewSidePinPoint(pinPointMuscle.visualisatie[0]?.image.includes('achter') ? 'achter' : 'voor');
+    }
+  }, [pinPointMuscle]);
+
+  const getStreakTitle = (s: number) => {
+    if (s <= 5) return 'Stagiair';
+    if (s <= 15) return 'Spier-Bieb Champion';
+    return 'Biomechanica Baas';
+  };
+
+  const handleShareScore = async () => {
+    if (!flexCardRef.current || isSharing) return;
+    
+    setIsSharing(true);
+    try {
+      const canvas = await html2canvas(flexCardRef.current, {
+        backgroundColor: '#020617', // slate-950 fallback
+        scale: 2,
+        logging: false,
+        useCORS: true
+      });
+
+      canvas.toBlob(async (blob) => {
+        if (!blob) {
+          setIsSharing(false);
+          return;
+        }
+
+        const file = new File([blob], `anatomy-vibe-streak-${streak}.png`, { type: 'image/png' });
+        const shareData = {
+          title: 'Anatomy Vibe Highscore',
+          text: t[language].shareTextStreak.replace("{streak}", streak.toString()).replace("{rank}", getStreakTitle(streak)),
+          files: [file]
+        };
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share(shareData);
+          } catch (err) {
+            console.log("Gebruiker heeft share geannuleerd of er ging iets mis:", err);
+          }
+        } else {
+          // Fallback download
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = file.name;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }
+        setIsSharing(false);
+      }, 'image/png');
+    } catch (err) {
+      console.error("Error generating share image:", err);
+      setIsSharing(false);
+    }
+  };
+
+  const filteredMuscles = useMemo(() => {
+    return MUSCLES.filter(m => {
+      return m.naam.toLowerCase().includes(searchQuery.toLowerCase());
+    });
+  }, [searchQuery]);
+
+  // Pin-Point Logic
+  useEffect(() => {
+    if (activeTab === 'pinpoint' && !pinPointMuscle && !isPinPointFinished) {
+      pickRandomPinPoint();
+    }
+  }, [activeTab]);
+
+  const startNewPinPointSession = () => {
+    setPinPointRound(1);
+    setPinPointXp(0);
+    setPinPointHistory([]);
+    setIsPinPointFinished(false);
+    pickRandomPinPoint();
+  };
+
+  const pickRandomPinPoint = () => {
+    const randomMuscle = MUSCLES[Math.floor(Math.random() * MUSCLES.length)];
+    setPinPointMuscle(randomMuscle);
+    setPinPointTarget(Math.random() > 0.5 ? 'origo' : 'insertie');
+    setPinPointClick(null);
+    setPinPointFeedback(null);
+  };
+
+  const [pinPointSide, setPinPointSide] = React.useState<'voor' | 'achter'>('voor');
+  const handlePinPointClick = (e: React.MouseEvent<HTMLDivElement>, x: number, y: number, side: 'voor' | 'achter') => {
+    if (pinPointClick || !pinPointMuscle) return; // already clicked
+
+    setPinPointClick({ x, y });
+    setPinPointSide(side);
+
+    // Find all valid targets on the current side
+    const validTargets = pinPointMuscle.visualisatie.filter(p => p.type === pinPointTarget && p.image.includes(side));
+    
+    let minDistance = Infinity;
+    
+    if (validTargets.length > 0) {
+      validTargets.forEach(target => {
+        const actualX = parseFloat(target.x);
+        const actualY = parseFloat(target.y);
+        const d = Math.sqrt(Math.pow(x - actualX, 2) + Math.pow(y - actualY, 2));
+        if (d < minDistance) minDistance = d;
+      });
+    }
+
+    let xp = 0;
+    let message = t[language].miss;
+    
+    if (minDistance < 3) { xp = 100; message = t[language].bullseye; }
+    else if (minDistance < 6) { xp = 75; message = t[language].great; }
+    else if (minDistance < 10) { xp = 50; message = t[language].close; }
+
+    setPinPointXp(prev => prev + xp);
+    setPinPointFeedback({ distance: minDistance, xp, message });
+    setPinPointHistory(prev => [...prev, { naam: pinPointMuscle.naam, target: pinPointTarget, distance: minDistance, xp }]);
+    setTimeout(() => { handlePinPointNext(); }, 1200);
+  };
+
+  const handlePinPointNext = () => {
+    if (pinPointRound >= 10) {
+      setIsPinPointFinished(true);
+    } else {
+      setPinPointRound(r => r + 1);
+      pickRandomPinPoint();
+    }
+  };
+
+  const getPinPointRank = (score: number) => {
+    if (score < 400) return 'Anatomie Tourist';
+    if (score < 800) return 'Klinisch Redeneerder';
+    return 'Sniper Baas';
+  };
+
+  const bestPinPoint = useMemo(() => {
+    if (pinPointHistory.length === 0) return null;
+    return [...pinPointHistory].sort((a, b) => a.distance - b.distance)[0];
+  }, [pinPointHistory]);
+
+  const worstPinPoint = useMemo(() => {
+    if (pinPointHistory.length === 0) return null;
+    return [...pinPointHistory].sort((a, b) => b.distance - a.distance)[0];
+  }, [pinPointHistory]);
+
+  
+  
+  const handleSharePinPoint = async () => {
+    if (isSharing) return;
+    setIsSharing(true);
+    try {
+      const shareData: any = {
+        title: 'MSK Coach Locatie Score',
+        text: t[language].shareTextPinPoint.replace("{xp}", pinPointXp.toString()).replace("{rank}", getPinPointRank(pinPointXp)),
+      };
+      
+      if (pinPointShareFile) {
+        shareData.files = [pinPointShareFile];
+      }
+
+      if (navigator.canShare && (pinPointShareFile ? navigator.canShare({ files: shareData.files }) : navigator.canShare({ text: shareData.text }))) {
+        await navigator.share(shareData);
+      } else if (pinPointShareFile) {
+        const url = URL.createObjectURL(pinPointShareFile);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = pinPointShareFile.name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    setIsSharing(false);
+  };
+
+  useEffect(() => {
+    if (isPinPointFinished && pinPointFlexCardRef.current) {
+      setTimeout(() => {
+        html2canvas(pinPointFlexCardRef.current!, {
+          backgroundColor: '#020617',
+          scale: 2,
+          logging: false,
+          useCORS: true
+        }).then(canvas => {
+          canvas.toBlob(blob => {
+            if (blob) {
+              setPinPointShareFile(new File([blob], `anatomy-vibe-pinpoint-${pinPointXp}.png`, { type: 'image/png' }));
+            }
+          }, 'image/png');
+        }).catch(err => console.error(err));
+      }, 500); // Give it a bit to render
+    } else {
+      setPinPointShareFile(null);
+    }
+  }, [isPinPointFinished, pinPointXp]);
+
+  
+  // Quiz Logic
+  useEffect(() => {
+    if (quizMuscle) {
+      setViewSideQuiz(quizMuscle.visualisatie[0]?.image.includes('achter') ? 'achter' : 'voor');
+    }
+  }, [quizMuscle]);
+
+  useEffect(() => {
+    if (activeTab === 'quiz' && !quizMuscle) {
+      startNewQuizRound();
+    }
+  }, [activeTab]);
+
+  const startNewQuizRound = () => {
+    const randomMuscle = MUSCLES[Math.floor(Math.random() * MUSCLES.length)];
+    setQuizMuscle(randomMuscle);
+    setQuizAnswered(false);
+    setQuizSelectedOption(null);
+    setShowSuccessAnimation(false);
+    
+    const distractors = MUSCLES.filter(m => m.id !== randomMuscle.id);
+    const shuffledDistractors = distractors.sort(() => 0.5 - Math.random()).slice(0, 5);
+    const options = [...shuffledDistractors.map(m => m.naam), randomMuscle.naam];
+    
+    setQuizOptions(options.sort(() => 0.5 - Math.random()));
+  };
+
+  const handleQuizOptionClick = (optionName: string) => {
+    if (quizAnswered || !quizMuscle) return;
+    
+    setQuizAnswered(true);
+    setQuizSelectedOption(optionName);
+    
+    if (optionName === quizMuscle.naam) {
+      setQuizStreak(s => s + 1);
+      setShowSuccessAnimation(true);
+      setTimeout(() => { setShowSuccessAnimation(false); startNewQuizRound(); }, 1200);
+    } else {
+      setQuizStreak(0);
+    }
+  };
+
+// Zenuwen Logic
+  useEffect(() => {
+    if (activeTab === 'zenuwen' && !targetNerve && !isNerveFinished) {
+      generateNerveRound();
+    }
+  }, [activeTab]);
+
+  const startNewNerveSession = () => {
+    setNerveRound(1);
+    setNerveXp(0);
+    setNerveHistory([]);
+    setIsNerveFinished(false);
+    setNerveMistakesThisRound(0);
+    generateNerveRound();
+  };
+
+  const generateNerveRound = () => {
+    setNerveMistakesThisRound(0);
+    
+    const randomNerveMuscle = MUSCLES[Math.floor(Math.random() * MUSCLES.length)];
+    const selectedNerveObj = { nl: randomNerveMuscle.nl.innervatie, en: randomNerveMuscle.en.innervatie };
+    setTargetNerveObj(selectedNerveObj);
+    const selectedNerve = selectedNerveObj[language];
+
+    const matchingMuscles = MUSCLES.filter(m => m[language].innervatie === selectedNerve);
+    const nonMatchingMuscles = MUSCLES.filter(m => m[language].innervatie !== selectedNerve);
+
+    const shuffle = (arr: any[]) => [...arr].sort(() => Math.random() - 0.5);
+
+    const maxTargets = Math.min(matchingMuscles.length, 2 + Math.floor(Math.random() * 2)); // 2 or 3
+    const selectedMatching = shuffle(matchingMuscles).slice(0, maxTargets);
+    setCorrectCountInGrid(selectedMatching.length);
+
+    const selectedNonMatching = shuffle(nonMatchingMuscles).slice(0, 6 - selectedMatching.length);
+
+    const finalGrid = shuffle([...selectedMatching, ...selectedNonMatching]);
+    setNerveGrid(finalGrid);
+    setFoundNerves([]);
+    setIsNerveLevelComplete(false);
+  };
+
+  const handleNerveClick = (muscle: Muscle) => {
+    if (foundNerves.includes(muscle.id) || isNerveLevelComplete || isNerveFinished) return;
+
+    if (muscle[language].innervatie === targetNerve) {
+      const newFound = [...foundNerves, muscle.id];
+      setFoundNerves(newFound);
+      if (newFound.length === correctCountInGrid) {
+        setIsNerveLevelComplete(true);
+        
+        const xpEarned = Math.max(0, 100 - (nerveMistakesThisRound * 25));
+        setNerveXp(prev => prev + xpEarned);
+        setNerveHistory(prev => [...prev, { nerve: targetNerveObj!, mistakes: nerveMistakesThisRound, xp: xpEarned }]);
+
+        if (nerveRound >= 10) {
+          setTimeout(() => { setIsNerveFinished(true); setIsNerveLevelComplete(false); }, 1200);
+        } else {
+          setTimeout(() => { setNerveRound(r => r + 1); generateNerveRound(); }, 1200);
+        }
+      }
+    } else {
+      setShakingNerve(muscle.id);
+      setNerveMistakesThisRound(m => m + 1);
+      setTimeout(() => setShakingNerve(null), 300);
+    }
+  };
+
+  const getNerveRank = (score: number) => {
+    if (score < 400) return 'Zenuwslopend';
+    if (score < 800) return 'Neuroloog in Opleiding';
+    return 'Neuro-Master';
+  };
+
+  const bestNerve = useMemo(() => {
+    if (nerveHistory.length === 0) return null;
+    return [...nerveHistory].sort((a, b) => a.mistakes - b.mistakes)[0];
+  }, [nerveHistory]);
+
+  const worstNerve = useMemo(() => {
+    if (nerveHistory.length === 0) return null;
+    return [...nerveHistory].sort((a, b) => b.mistakes - a.mistakes)[0];
+  }, [nerveHistory]);
+
+  const handleShareNerve = async () => {
+    if (!nerveFlexCardRef.current || isSharing) return;
+    
+    setIsSharing(true);
+    try {
+      const canvas = await html2canvas(nerveFlexCardRef.current, {
+        backgroundColor: '#020617',
+        scale: 2,
+        logging: false,
+        useCORS: true
+      });
+
+      canvas.toBlob(async (blob) => {
+        if (!blob) {
+          setIsSharing(false);
+          return;
+        }
+
+        const file = new File([blob], `anatomy-vibe-innervatie-${nerveXp}.png`, { type: 'image/png' });
+        const shareData = {
+          title: 'MSK Coach Innervatie Score',
+          text: t[language].shareTextNerve.replace("{xp}", nerveXp.toString()).replace("{rank}", getNerveRank(nerveXp)),
+          files: [file]
+        };
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share(shareData);
+          } catch (err) {
+            console.log("Share annuleren", err);
+          }
+        } else {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = file.name;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }
+        setIsSharing(false);
+      }, 'image/png');
+    } catch (err) {
+      console.error(err);
+      setIsSharing(false);
+    }
+  };
+
+  // Oefenen Logic
+  useEffect(() => {
+    if (!currentPracticeMuscle) {
+      pickRandomMuscle();
+    }
+  }, []);
+
+  const pickRandomMuscle = () => {
+    const randomMuscle = MUSCLES[Math.floor(Math.random() * MUSCLES.length)];
+    setCurrentPracticeMuscle(randomMuscle);
+    setShowSuccessAnimation(false);
+    setGuessedMovements({});
+    
+    // Generate 6 options
+    const correctOptions = MOVEMENTS.filter(m => checkMovementMatch(m, randomMuscle[language].functie));
+    let incorrectOptions = MOVEMENTS.filter(m => !correctOptions.includes(m));
+    
+    // Shuffle incorrectOptions
+    incorrectOptions.sort(() => 0.5 - Math.random());
+    
+    // Pick enough incorrect to make 6 total (if possible, else use all)
+    const needed = Math.max(0, 6 - correctOptions.length);
+    const selectedIncorrect = incorrectOptions.slice(0, needed);
+    
+    const combined = [...correctOptions, ...selectedIncorrect];
+    // Shuffle combined
+    combined.sort(() => 0.5 - Math.random());
+    
+    setPracticeOptions(combined);
+  };
+
+  const handleNextMuscle = () => {
+    setStreak(s => s + 1);
+    pickRandomMuscle();
+  };
+
+  const handleInfoClick = () => {
+    setStreak(0);
+    setSelectedMuscle(currentPracticeMuscle);
+  };
+
+
+  
+  const checkMovementMatch = (movement: string, funcText: string) => {
+    let text = funcText.toLowerCase();
+    const mov = movement.toLowerCase();
+
+    if (mov === 'anteflexie') {
+      return /anteflex|flexie heup|hip flexion|flexie van de heup|flexes the hip/i.test(funcText);
+    }
+    if (mov === 'dorsoflexie') {
+      return /dorsoflex|retroflex|extensie heup|hip extension|extensie van de heup|extends the hip/i.test(funcText);
+    }
+    if (mov === 'flexie') {
+      text = text.replace(/plantairflexie|plantarflexion|plantar flexion|dorsaalflexie|dorsiflexion|anteflexie|dorsoflexie|flexie heup|hip flexion|flexie van de heup|flexes the hip/gi, '');
+      return text.includes('flex');
+    }
+    if (mov === 'extensie') {
+      text = text.replace(/extensie heup|hip extension|extensie van de heup|extends the hip/gi, '');
+      return text.includes('exten');
+    }
+    if (mov === 'abductie') return text.includes('abduc');
+    if (mov === 'adductie') return text.includes('adduc');
+    if (mov === 'endorotatie') return /endorot|internal rot|inwaartse rot|medial rot/.test(text);
+    if (mov === 'exorotatie') return /exorot|external rot|buitenwaartse rot|lateral rot/.test(text);
+    if (mov === 'plantairflexie') return /plantair|plantar/.test(text);
+    if (mov === 'dorsaalflexie') return /dorsaal|dorsi/.test(text);
+    if (mov === 'inversie') return text.includes('invers');
+    if (mov === 'eversie') return text.includes('evers');
+
+    return false;
+  };
+const handleMovementClick = (movement: string) => {
+    if (!currentPracticeMuscle) return;
+    if (guessedMovements[movement] === 'correct') return;
+
+    const hasMovement = checkMovementMatch(movement, currentPracticeMuscle[language].functie);
+    
+    if (hasMovement) {
+      setGuessedMovements(prev => ({ ...prev, [movement]: 'correct' }));
+    } else {
+      setGuessedMovements(prev => ({ ...prev, [movement]: 'incorrect' }));
+      setShakeMovement(movement);
+      setTimeout(() => setShakeMovement(null), 300);
+    }
+  };
+
+  const correctMovementsForCurrent = useMemo(() => {
+    if (!currentPracticeMuscle) return [];
+    return MOVEMENTS.filter(m => {
+      const translatedMovement = t[language].movements[m as keyof typeof t.nl.movements];
+      return currentPracticeMuscle[language].functie.toLowerCase().includes(translatedMovement.toLowerCase());
+    });
+  }, [currentPracticeMuscle]);
+
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
+
+  const correctPracticeOptions = currentPracticeMuscle ? practiceOptions.filter(m => checkMovementMatch(m, currentPracticeMuscle[language].functie)) : [];
+  const isMuscleComplete = currentPracticeMuscle && correctPracticeOptions.length > 0 && correctPracticeOptions.every(m => guessedMovements[m] === 'correct');
+
+  useEffect(() => {
+    if (isMuscleComplete) {
+      setShowSuccessAnimation(true);
+      const t = setTimeout(() => { setShowSuccessAnimation(false); handleNextMuscle(); }, 1200);
+      return () => clearTimeout(t);
+    }
+  }, [isMuscleComplete]);
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-cyan-500/30 overflow-hidden relative flex flex-col">
+      {/* Background Orbs for Glassmorphism effect */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-cyan-600/20 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-fuchsia-600/20 rounded-full blur-[100px] pointer-events-none" />
+
+      {/* Header */}
+      <header className="flex items-center justify-between p-4 bg-white/5 backdrop-blur-md border-b border-white/10 z-10">
+        <button onClick={() => setIsMenuOpen(true)} className="p-2 rounded-full hover:bg-white/10 transition-colors">
+          <Menu className="w-6 h-6 text-cyan-400" />
+        </button>
+        <h1 className="text-xl font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-400">
+          MSK COACH
+        </h1>
+        <div className="w-10" /> {/* Spacer for centering */}
+      </header>
+
+      {/* Drawer Menu */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm"
+              onClick={() => setIsMenuOpen(false)}
+            />
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="fixed inset-y-0 left-0 z-50 w-3/4 max-w-sm bg-slate-900/90 backdrop-blur-xl border-r border-white/10 shadow-2xl p-6 flex flex-col"
+            >
+              <div className="flex justify-between items-center mb-8">
+                <h2 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-400">
+                  MSK COACH
+                </h2>
+                <button onClick={() => setIsMenuOpen(false)} className="p-2 bg-white/5 rounded-full text-slate-400 hover:text-white transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              
+              
+              <div className="flex bg-slate-950 p-1 rounded-full mb-8 relative border border-white/10">
+                <div 
+                  className="absolute inset-y-1 w-[calc(50%-4px)] bg-slate-800 rounded-full transition-all duration-300 shadow-sm"
+                  style={{ left: language === 'nl' ? '4px' : 'calc(50%)' }}
+                />
+                <button
+                  onClick={() => setLanguage('nl')}
+                  className={`flex-1 py-2 text-sm font-bold z-10 transition-colors ${language === 'nl' ? 'text-white' : 'text-slate-500'}`}
+                >
+                  🇳🇱 NL
+                </button>
+                <button
+                  onClick={() => setLanguage('en')}
+                  className={`flex-1 py-2 text-sm font-bold z-10 transition-colors ${language === 'en' ? 'text-white' : 'text-slate-500'}`}
+                >
+                  🇬🇧 EN
+                </button>
+              </div>
+              
+                            <div className="flex flex-col gap-4">
+                
+                {!isStandalone && (
+                  <button 
+                    onClick={handleInstallClick}
+                    className="flex items-center gap-3 w-full p-4 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 font-bold rounded-2xl transition-colors border border-cyan-500/20"
+                  >
+                    <Download className="w-6 h-6" />
+                    <span>{t[language].installApp}</span>
+                  </button>
+                )}
+
+                <button 
+                  onClick={() => {
+                    setStreak(0);
+                    setPinPointXp(0);
+                    setGuessedMovements({});
+                    setPinPointClick(null);
+                    setPinPointFeedback(null);
+                    setNerveRound(1);
+                    setNerveXp(0);
+                    setNerveHistory([]);
+                    setIsNerveFinished(false);
+                    setNerveMistakesThisRound(0);
+                    setIsMenuOpen(false);
+                  }}
+                  className="flex items-center gap-3 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:bg-rose-500/20 transition-colors text-left"
+                >
+                  <RotateCcw className="w-5 h-5" />
+                  <span className="font-semibold">{t[language].resetProgress}</span>
+                </button>
+                
+                <div className="p-4 rounded-xl bg-white/5 border border-white/10 mt-4 text-slate-300 text-sm leading-relaxed">
+                  <h3 className="font-bold text-slate-200 mb-2">{t[language].aboutTitle}</h3>
+                  <p>{t[language].aboutText}</p>
+                </div>
+              </div>
+
+              <div className="mt-auto pt-8 text-center text-xs text-slate-500 font-medium">
+                Auteur: <a href="https://www.linkedin.com/in/tim-gerbrands" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">Tim Gerbrands</a>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Main Content Area */}
+      <main className="flex-1 overflow-y-auto p-3 sm:p-4 pb-20 z-10 scrollbar-hide flex flex-col">
+        {activeTab === 'bieb' && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="flex flex-col gap-4 max-w-2xl mx-auto"
+          >
+            {/* Search & Filter */}
+            
+            {/* Hero Section */}
+            <div className="bg-gradient-to-br from-cyan-900/40 to-fuchsia-900/40 rounded-3xl p-6 border border-white/10 mb-2 shadow-2xl relative overflow-hidden shrink-0 mt-2">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-fuchsia-500/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+              <div className="relative z-10 flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl sm:text-3xl font-black text-white mb-2 tracking-tight">MSK <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-400">Coach</span></h2>
+                  <p className="text-slate-300 text-sm max-w-[200px] leading-relaxed">
+                    {language === 'nl' ? 'Master je anatomie en klinisch redeneren.' : 'Master your anatomy and clinical reasoning.'}
+                  </p>
+                </div>
+                <div className="text-5xl drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">💪</div>
+              </div>
+              <div className="grid grid-cols-2 gap-3 mt-6 relative z-10">
+                <div className="bg-slate-900/50 backdrop-blur-sm rounded-2xl p-3 border border-white/5 flex flex-col items-center justify-center">
+                  <span className="text-2xl font-bold text-cyan-400 mb-1">{MUSCLES.length}</span>
+                  <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Spieren</span>
+                </div>
+                <div className="bg-slate-900/50 backdrop-blur-sm rounded-2xl p-3 border border-white/5 flex flex-col items-center justify-center">
+                  <span className="text-2xl font-bold text-fuchsia-400 mb-1">3</span>
+                  <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Gamemodes</span>
+                </div>
+              </div>
+            </div>
+<div className="flex flex-col gap-3 sticky top-0 bg-slate-950/80 backdrop-blur-md p-2 -mx-2 z-20 rounded-xl">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder={t[language].searchPlaceholder}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/50 transition-all"
+                />
+              </div>
+            </div>
+
+            {/* List */}
+            <div className="flex flex-col gap-3 mt-2">
+              {filteredMuscles.length > 0 ? (
+                filteredMuscles.map(muscle => (
+                  <button
+                    key={muscle.id}
+                    onClick={() => setSelectedMuscle(muscle)}
+                    className="flex items-center justify-between p-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl hover:bg-white/10 hover:border-cyan-400/30 transition-all group text-left"
+                  >
+                    <div>
+                      <h3 className="font-semibold text-lg text-slate-100 group-hover:text-cyan-300 transition-colors">
+                        {muscle.naam}
+                      </h3>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-slate-500 group-hover:text-cyan-400 transition-colors" />
+                  </button>
+                ))
+              ) : (
+                <div className="text-center py-10 text-slate-500">
+                  Geen spieren gevonden voor deze zoekopdracht.
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'oefenen' && currentPracticeMuscle && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col flex-1 min-h-0 w-full max-w-2xl mx-auto"
+          >
+            {/* Oefenen Top Bar */}
+            <div className="flex justify-between items-center mb-4 bg-white/5 backdrop-blur-md rounded-2xl p-4 border border-white/10 shrink-0">
+              <h2 className="text-lg sm:text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-100 to-slate-400">
+                {currentPracticeMuscle.naam}
+              </h2>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-500/10 text-rose-400 rounded-full border border-rose-500/20 shadow-[0_0_10px_rgba(244,63,94,0.1)]">
+                  <Flame className="w-4 h-4" />
+                  <span className="font-bold text-sm">{streak}</span>
+                </div>
+                <button
+                  onClick={handleShareScore}
+                  disabled={isSharing}
+                  className="flex items-center justify-center p-2 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500/20 transition-colors disabled:opacity-50"
+                  title={t[language].shareScore}
+                >
+                  {isSharing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Share2 className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Playfield */}
+            <div className="relative flex-1 min-h-0 mb-4 bg-slate-900/60 rounded-3xl border border-white/10 overflow-hidden shadow-[inset_0_0_50px_rgba(0,0,0,0.5)] flex items-center justify-center p-2 sm:p-4">
+              <AnimatePresence>
+                {showSuccessAnimation && (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 z-20 flex items-center justify-center bg-emerald-500/20 backdrop-blur-sm"
+                  >
+                    <motion.div 
+                      initial={{ y: 20 }}
+                      animate={{ y: 0 }}
+                      className="bg-emerald-500 text-white font-black text-3xl sm:text-5xl px-8 py-4 rounded-3xl shadow-[0_0_40px_rgba(16,185,129,0.8)] border border-white/20"
+                    >
+                      {t[language].correct} 🎉
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+                            
+              <div className="flex w-full h-full items-center justify-center pt-8 overflow-hidden min-h-0 shrink">
+                {getRequiredSides(currentPracticeMuscle).map(side => (
+                  <div key={side} className="relative inline-block min-h-0 shrink">
+                    
+                  </div>
+                ))}} from 'react';
