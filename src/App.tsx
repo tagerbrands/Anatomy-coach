@@ -193,7 +193,7 @@ function MusclePlayfield({ muscle, language, children, showSuccess, successText,
   };
   const sides = getRequiredSides(muscle);
   return (
-    <div className="relative flex-1 min-h-0 mb-4 bg-slate-900/60 rounded-3xl border border-white/10 overflow-hidden shadow-[inset_0_0_50px_rgba(0,0,0,0.5)] flex flex-col p-2 sm:p-4">
+    <div className="relative flex-1 min-h-[40vh] mb-2 bg-slate-900/40 sm:rounded-b-3xl border-b border-white/10 overflow-hidden flex flex-col items-center justify-center p-2 sm:p-4">
       <AnimatePresence>
         {showSuccess && (
           <motion.div 
@@ -221,7 +221,7 @@ function MusclePlayfield({ muscle, language, children, showSuccess, successText,
         </div>
       )}
 
-      <div className="flex w-full h-full items-center justify-center pt-8 overflow-hidden min-h-0 shrink gap-2 sm:gap-8">
+      <div className="flex w-full h-full items-center justify-center pt-4 overflow-hidden min-h-0 shrink gap-2 sm:gap-8">
         {sides.map(side => {
            const isCurrentSidePinPoint = pinPointSide === side;
            return (
@@ -238,7 +238,7 @@ function MusclePlayfield({ muscle, language, children, showSuccess, successText,
                <img 
                  src={getRegionImage(muscle, side)} 
                  alt={`Skelet ${side}`} 
-                 className="block pointer-events-none opacity-80 mix-blend-screen h-full max-h-[42vh] sm:max-h-[55vh] w-auto object-contain shrink"
+                 className="block pointer-events-none opacity-90 mix-blend-screen h-full max-h-[45vh] sm:max-h-[60vh] w-auto object-contain shrink"
                  onError={(e) => { e.currentTarget.src = "https://placehold.co/400x800/1e293b/334155?text=Skelet"; }}
                />
                
@@ -912,17 +912,6 @@ const handleMovementClick = (movement: string) => {
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-cyan-600/20 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-fuchsia-600/20 rounded-full blur-[100px] pointer-events-none" />
 
-      {/* Header */}
-      <header className="flex items-center justify-between p-2 bg-white/5 backdrop-blur-md border-b border-white/10 z-10">
-        <button onClick={() => setIsMenuOpen(true)} className="p-2 rounded-full hover:bg-white/10 transition-colors">
-          <Menu className="w-6 h-6 text-cyan-400" />
-        </button>
-        <h1 className="text-base font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-400">
-          MSK COACH
-        </h1>
-        <div className="w-10" /> {/* Spacer for centering */}
-      </header>
-
       {/* Drawer Menu */}
       <AnimatePresence>
         {isMenuOpen && (
@@ -1017,13 +1006,13 @@ const handleMovementClick = (movement: string) => {
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto p-3 sm:p-4 pb-20 z-10 scrollbar-hide flex flex-col">
+      <main className="flex-1 overflow-y-auto pb-20 z-10 scrollbar-hide flex flex-col h-full">
         {activeTab === 'bieb' && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="flex flex-col gap-4 max-w-2xl mx-auto"
+            className="flex flex-col gap-4 max-w-2xl mx-auto px-4 pt-4"
           >
             {/* Search & Filter */}
             
@@ -1103,7 +1092,7 @@ const handleMovementClick = (movement: string) => {
               overlayTitle={currentPracticeMuscle.naam}
             >
               {/* Controls */}
-              <div className="flex flex-col gap-4 shrink-0 pb-2">
+              <div className="flex flex-col gap-4 shrink-0 pb-2 px-4">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
                   {practiceOptions.map(movement => {
                     const status = guessedMovements[movement];
@@ -1194,7 +1183,7 @@ const handleMovementClick = (movement: string) => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 20 }}
-                  className="shrink-0 bg-slate-900/80 backdrop-blur-md border border-white/10 rounded-2xl p-5 shadow-2xl flex justify-between items-center"
+                  className="shrink-0 mx-4 bg-slate-900/80 backdrop-blur-md border border-white/10 rounded-2xl p-5 shadow-2xl flex justify-between items-center"
                 >
                   <div>
                     <h3 className="text-xl font-bold text-white mb-1">{pinPointFeedback.message}</h3>
@@ -1214,7 +1203,7 @@ const handleMovementClick = (movement: string) => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="flex justify-between items-center mt-2 px-2"
+                  className="flex justify-between items-center mt-2 px-6 pb-2"
                 >
                   <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">🎯 {t[language].round} {pinPointRound} / 10</div>
                   <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 text-amber-400 rounded-full border border-amber-500/20 shadow-[0_0_10px_rgba(244,163,64,0.1)]">
@@ -1231,7 +1220,7 @@ const handleMovementClick = (movement: string) => {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col flex-1 min-h-0 w-full max-w-2xl mx-auto"
+            className="flex flex-col flex-1 min-h-0 w-full max-w-2xl mx-auto px-4"
           >
             <div className="text-center mb-6 mt-4 hidden">
               <h2 className="text-slate-400 font-medium mb-1">{t[language].supplyPower}</h2>
@@ -1409,7 +1398,7 @@ const handleMovementClick = (movement: string) => {
               overlayTitle={`${t[language].question} ${quizStreak + 1}`}
             >
               {/* Controls */}
-              <div className="flex flex-col gap-4 shrink-0 pb-2">
+              <div className="flex flex-col gap-4 shrink-0 pb-2 px-4">
                 <div className="grid grid-cols-2 gap-2 sm:gap-3">
                   {quizOptions.map((option) => {
                     let btnClass = "bg-white/5 text-slate-300 border-white/10 hover:bg-white/10";
@@ -1466,16 +1455,23 @@ const handleMovementClick = (movement: string) => {
         )}
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 w-full bg-slate-900/80 backdrop-blur-lg border-t border-white/10 pb-safe z-40">
-        <div className="flex justify-around items-center h-16 max-w-md mx-auto px-2">
+      <nav className="fixed bottom-0 w-full bg-slate-900/90 backdrop-blur-xl border-t border-white/10 pb-safe z-40">
+        <div className="flex justify-between items-center h-16 max-w-lg mx-auto px-1 sm:px-2">
+          <button 
+            onClick={() => setIsMenuOpen(true)}
+            className="flex flex-col items-center justify-center w-full h-full space-y-1 text-slate-500 hover:text-slate-300"
+          >
+            <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
+            <span className="text-[9px] sm:text-[10px] font-medium tracking-tight">Menu</span>
+          </button>
           <button 
             onClick={() => setActiveTab('bieb')}
             className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${
               activeTab === 'bieb' ? 'text-cyan-400' : 'text-slate-500 hover:text-slate-300'
             }`}
           >
-            <Library className="w-6 h-6" />
-            <span className="text-[10px] sm:text-xs font-medium">{t[language].library}</span>
+            <Library className="w-5 h-5 sm:w-6 sm:h-6" />
+            <span className="text-[9px] sm:text-[10px] font-medium tracking-tight">{t[language].library}</span>
           </button>
           <button 
             onClick={() => setActiveTab('oefenen')}
@@ -1483,8 +1479,8 @@ const handleMovementClick = (movement: string) => {
               activeTab === 'oefenen' ? 'text-fuchsia-400' : 'text-slate-500 hover:text-slate-300'
             }`}
           >
-            <Activity className="w-6 h-6" />
-            <span className="text-[10px] sm:text-xs font-medium">{t[language].practice}</span>
+            <Activity className="w-5 h-5 sm:w-6 sm:h-6" />
+            <span className="text-[9px] sm:text-[10px] font-medium tracking-tight">{t[language].practice}</span>
           </button>
           <button 
             onClick={() => setActiveTab('pinpoint')}
@@ -1492,8 +1488,8 @@ const handleMovementClick = (movement: string) => {
               activeTab === 'pinpoint' ? 'text-amber-400' : 'text-slate-500 hover:text-slate-300'
             }`}
           >
-            <Target className="w-6 h-6" />
-            <span className="text-[10px] sm:text-xs font-medium">{t[language].pinpoint}</span>
+            <Target className="w-5 h-5 sm:w-6 sm:h-6" />
+            <span className="text-[9px] sm:text-[10px] font-medium tracking-tight">{t[language].pinpoint}</span>
           </button>
           <button 
             onClick={() => setActiveTab('zenuwen')}
@@ -1501,17 +1497,17 @@ const handleMovementClick = (movement: string) => {
               activeTab === 'zenuwen' ? 'text-yellow-400' : 'text-slate-500 hover:text-slate-300'
             }`}
           >
-            <Zap className="w-6 h-6" />
-            <span className="text-[10px] sm:text-xs font-medium">{t[language].nerves}</span>
+            <Zap className="w-5 h-5 sm:w-6 sm:h-6" />
+            <span className="text-[9px] sm:text-[10px] font-medium tracking-tight">{t[language].nerves}</span>
           </button>
           <button 
             onClick={() => setActiveTab('quiz')}
             className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${
-              activeTab === 'quiz' ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'
+              activeTab === 'quiz' ? 'text-orange-400' : 'text-slate-500 hover:text-slate-300'
             }`}
           >
-            <HelpCircle className="w-6 h-6" />
-            <span className="text-[10px] sm:text-xs font-medium">{t[language].quiz}</span>
+            <HelpCircle className="w-5 h-5 sm:w-6 sm:h-6" />
+            <span className="text-[9px] sm:text-[10px] font-medium tracking-tight">Quiz</span>
           </button>
         </div>
       </nav>
